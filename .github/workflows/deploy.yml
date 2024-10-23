@@ -1,0 +1,33 @@
+name: Deploy to Github Pages
+
+on:
+    push:
+        branches: [main]
+    workflow_dispatch:
+
+permissions:
+    contents: read
+    pages: write
+    id-token: write
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repo using git
+              uses: actions/checkout@v4
+            - name: Install, build, upload site
+              uses: withastro/action@v1
+              env:
+                  PUBLIC_ARCGIS_APP_ID: ${{ secrets.ARCGIS_APP_ID }}
+
+    deploy:
+        needs: build
+        runs-on: ubuntu-latest
+        environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+        steps:
+            - name: Deploy using Pages Action
+              uses: actions/deploy-pages@v4
+              id: deployment
