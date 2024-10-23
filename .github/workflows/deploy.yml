@@ -17,7 +17,7 @@ jobs:
             - name: Checkout repo using git
               uses: actions/checkout@v4
             - name: Install, build, upload site
-              uses: withastro/action@v1
+              uses: withastro/action@v3
               env:
                   PUBLIC_ARCGIS_APP_ID: ${{ secrets.ARCGIS_APP_ID }}
 
@@ -29,5 +29,5 @@ jobs:
             url: ${{ steps.deployment.outputs.page_url }}
         steps:
             - name: Deploy using Pages Action
-              uses: actions/deploy-pages@v1
+              uses: actions/deploy-pages@v4
               id: deployment

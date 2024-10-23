@@ -36,8 +36,13 @@ import Controls from "./Controls.astro";
 
 	IdentityManager.registerOAuthInfos([info]);
 
-	await IdentityManager.getCredential(`${esriConfig.portalUrl}/sharing`);
-	await new Portal().load();
+	try {
+		await IdentityManager.getCredential(`${esriConfig.portalUrl}/sharing`);
+		await new Portal().load();
+	} catch (error) {
+		console.error(error);
+		throw error;
+	}
 
 	const map = new Map({
 		basemap: new Basemap({
