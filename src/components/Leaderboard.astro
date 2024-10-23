@@ -1,0 +1,81 @@
+---
+
+---
+
+<div id="leaderboard">
+	<div class="p-4">
+		<h2 class="mb-2 text-xl font-bold text-center text-gray-600">
+			Contributor Leaderboard
+		</h2>
+		<p class="text-center text-blue-400 font-blue">Last 7 days</p>
+	</div>
+	<div class="h-px bg-gray-200"></div>
+	<ol id="leaderboardList" class="space-y-4"></ol>
+</div>
+
+<script>
+	import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
+	import $ from "jquery";
+
+	function createQuery(): __esri.Query {
+		const query = new FeatureLayer().createQuery();
+		query.where = `CreationDate >= '${new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()}'`;
+		query.outFields = ["CreatorName"];
+
+		return query;
+	}
+
+	function countContributions(
+		features: __esri.Graphic[]
+	): Record<string, number> {
+		const contributionCounts: Record<string, number> = {};
+
+		for (const feature of features) {
+			const name = feature.attributes?.CreatorName;
+			if (name) {
+				contributionCounts[name] = (contributionCounts[name] || 0) + 1;
+			}
+		}
+
+		return contributionCounts;
+	}
+
+	function getTopContributors(
+		leaderboard: Record<string, number>,
+		limit: number
+	): { name: string; count: number }[] {
+		const contributors = Object.entries(leaderboard).map(
+			([name, count]) => ({
+				name,
+				count,
+			})
+		);
+
+		return contributors.sort((a, b) => b.count - a.count).slice(0, limit);
+	}
+
+	$(async function () {
+		const featureLayer = new FeatureLayer({
+			url: (window as any).MAP_URL,
+		});
+		const query = createQuery();
+
+		const results = await featureLayer.queryFeatures(query);
+		const leaderboard = countContributions(results.features);
+		const topContributors = getTopContributors(leaderboard, 10);
+
+		$("#leaderboardList").empty();
+
+		topContributors.forEach(function (contributor, index) {
+			$("#leaderboardList").append(`
+                <li class="flex items-center justify-between p-2 transition-all rounded-lg hover:bg-gray-100">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm font-bold text-gray-700">${index + 1}</span>
+                        <span class="text-sm font-bold text-gray-700">${contributor.name}</span>
+                    </div>
+                    <span class="text-sm text-gray-600">${contributor.count * 10} XP</span>
+                </li>
+            `);
+		});
+	});
+</script>

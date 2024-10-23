@@ -1,0 +1,38 @@
+---
+import Leaderboard from "./Leaderboard.astro";
+---
+
+<div class="absolute transition-all moveable top-2 left-2">
+	<button
+		id="leaderboardToggle"
+		class="flex items-center justify-center w-10 h-10 transition-all bg-white rounded-md sm:w-8 sm:h-8 hover:bg-gray-100 active:bg-gray-200"
+		aria-label="Toggle Leaderboard Visibility"
+	>
+		<i class="text-lg text-yellow-500 bi bi-trophy sm:text-base"></i>
+	</button>
+</div>
+
+<div class="absolute flex flex-col gap-2 top-2 right-2">
+	<button
+		id="zoomIn"
+		class="flex items-center justify-center w-10 h-10 transition-all bg-white rounded-md sm:w-8 sm:h-8 hover:bg-gray-100 active:bg-gray-200"
+		aria-label="Zoom In"
+	>
+		<i class="text-lg bi bi-plus sm:text-base"></i>
+	</button>
+
+	<button
+		id="zoomOut"
+		class="flex items-center justify-center w-10 h-10 transition-all bg-white rounded-md sm:w-8 sm:h-8 hover:bg-gray-100 active:bg-gray-200"
+		aria-label="Zoom Out"
+	>
+		<i class="text-lg bi bi-dash sm:text-base"></i>
+	</button>
+</div>
+
+<div
+	id="leaderboardContainer"
+	class="absolute top-0 left-0 w-56 transition-all -translate-x-full"
+>
+	<Leaderboard />
+</div>

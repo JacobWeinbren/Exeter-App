@@ -1,0 +1,75 @@
+---
+import Controls from "./Controls.astro";
+---
+
+<div id="map" class="w-full h-full transition-all moveable"></div>
+<Controls />
+
+<script>
+	import esriConfig from "@arcgis/core/config";
+	import OauthInfo from "@arcgis/core/identity/OAuthInfo";
+	import IdentityManager from "@arcgis/core/identity/IdentityManager";
+	import Portal from "@arcgis/core/portal/Portal";
+	import Map from "@arcgis/core/Map";
+	import Basemap from "@arcgis/core/Basemap";
+	import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
+	import VectorTileLayer from "@arcgis/core/layers/VectorTileLayer";
+	import MapView from "@arcgis/core/views/MapView";
+
+	import $ from "jquery";
+
+	import { initControls } from "../scripts/controls.ts";
+
+	esriConfig.portalUrl = "https://uoe.maps.arcgis.com";
+	esriConfig.assetsPath = "https://js.arcgis.com/4.30/@arcgis/core/assets";
+
+	(window as any).MAP_URL =
+		"https://services5.arcgis.com/N6Nhpnxaedla81he/arcgis/rest/services/QuickCaptureData/FeatureServer/0";
+
+	const info = new OauthInfo({
+		appId: import.meta.env.PUBLIC_ARCGIS_APP_ID,
+		popup: false,
+		portalUrl: "https://uoe.maps.arcgis.com",
+	});
+
+	IdentityManager.registerOAuthInfos([info]);
+
+	await IdentityManager.getCredential(`${esriConfig.portalUrl}/sharing`);
+	await new Portal().load();
+
+	const map = new Map({
+		basemap: new Basemap({
+			baseLayers: [
+				new VectorTileLayer({
+					portalItem: {
+						id: "8a2cba3b0ebf4140b7c0dc5ee149549a",
+					},
+				}),
+			],
+		}),
+		layers: [
+			new FeatureLayer({
+				url: (window as any).MAP_URL,
+				popupTemplate: {
+					title: "Information",
+					content: "Created by {CreatorName}",
+				},
+			}),
+		],
+	});
+
+	const view = new MapView({
+		container: "map",
+		map,
+		center: [-3.534422, 50.736509],
+		zoom: 15,
+		ui: {
+			components: ["attribution"],
+		},
+	});
+
+	initControls(view);
+
+	$("#loading").fadeOut();
+	$("#mapContainer").fadeIn();
+</script>

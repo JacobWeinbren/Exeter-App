@@ -1,0 +1,42 @@
+---
+import Map from "../components/Map.astro";
+
+import "bootstrap-icons/font/bootstrap-icons.css";
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+		/>
+		<meta name="generator" content={Astro.generator} />
+		<title>Wildy Accurate</title>
+		<link
+			rel="stylesheet"
+			href="https://js.arcgis.com/4.30/@arcgis/core/assets/esri/themes/light/main.css"
+		/>
+		<link
+			href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap"
+			rel="stylesheet"
+		/>
+	</head>
+	<body class="w-screen h-screen font-sans">
+		<div class="w-screen h-screen">
+			<div
+				id="loading"
+				class="flex flex-col items-center justify-center w-screen h-screen space-y-2"
+			>
+				<p class="text-4xl font-bold">Loading...</p>
+				<div class="text-8xl animate-spin">
+					<i class="bi bi-arrow-repeat"></i>
+				</div>
+			</div>
+			<div id="mapContainer" class="hidden w-screen h-screen">
+				<Map />
+			</div>
+		</div>
+	</body>
+</html>
