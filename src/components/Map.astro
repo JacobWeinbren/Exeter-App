@@ -29,7 +29,9 @@ import Controls from "./Controls.astro";
 	const info = new OauthInfo({
 		appId: import.meta.env.PUBLIC_ARCGIS_APP_ID,
 		popup: false,
-		portalUrl: "https://uoe.maps.arcgis.com",
+		portalUrl: esriConfig.portalUrl,
+		authNamespace: "/",
+		flowType: "auto",
 	});
 
 	IdentityManager.registerOAuthInfos([info]);
