@@ -25,17 +25,17 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 	</head>
 	<body class="w-screen h-screen font-sans">
 		<div class="w-screen h-screen">
+			<div id="mapContainer" class="opacity-0 w-screen h-screen">
+				<Map />
+			</div>
 			<div
 				id="loading"
-				class="flex flex-col items-center justify-center w-screen h-screen space-y-2"
+				class="absolute inset-0 flex flex-col items-center justify-center w-screen h-screen space-y-2"
 			>
 				<p class="text-4xl font-bold">Loading...</p>
 				<div class="text-8xl animate-spin">
 					<i class="bi bi-arrow-repeat"></i>
 				</div>
-			</div>
-			<div id="mapContainer" class="hidden w-screen h-screen">
-				<Map />
 			</div>
 		</div>
 	</body>
