@@ -5,7 +5,7 @@ import Chart from "./Chart.astro";
 
 <div
 	id="map"
-	class="absolute top-0 left-0 bottom-0 right-0 w-full h-full transition-all moveable"
+	class="absolute top-0 bottom-0 left-0 right-0 w-full h-full transition-all moveable"
 >
 </div>
 <Controls />
@@ -91,6 +91,24 @@ import Chart from "./Chart.astro";
 			}),
 		}),
 	});
+
+	biodiversityLayer.featureReduction = {
+		type: "cluster",
+		clusterRadius: 20,
+		clusterMaxSize: 20,
+		popupTemplate: {
+			content: "This cluster represents <b>{cluster_count}</b> features.",
+			fieldInfos: [
+				{
+					fieldName: "cluster_count",
+					format: {
+						digitSeparator: true,
+						places: 0,
+					},
+				},
+			],
+		},
+	};
 
 	map.add(biodiversityLayer);
 
