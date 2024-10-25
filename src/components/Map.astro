@@ -1,9 +1,15 @@
 ---
 import Controls from "./Controls.astro";
+import Chart from "./Chart.astro";
 ---
 
-<div id="map" class="w-full h-full transition-all moveable"></div>
+<div
+	id="map"
+	class="absolute top-0 left-0 w-full h-full transition-all moveable"
+>
+</div>
 <Controls />
+<Chart />
 
 <script>
 	import esriConfig from "@arcgis/core/config";
@@ -11,20 +17,19 @@ import Controls from "./Controls.astro";
 	import IdentityManager from "@arcgis/core/identity/IdentityManager";
 	import Portal from "@arcgis/core/portal/Portal";
 	import Map from "@arcgis/core/Map";
-	import Basemap from "@arcgis/core/Basemap";
-	import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 	import VectorTileLayer from "@arcgis/core/layers/VectorTileLayer";
+	import GroupLayer from "@arcgis/core/layers/GroupLayer";
+	import Basemap from "@arcgis/core/Basemap";
 	import MapView from "@arcgis/core/views/MapView";
-
+	import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 	import $ from "jquery";
-
 	import { initControls } from "../scripts/controls.ts";
 
 	esriConfig.portalUrl = "https://uoe.maps.arcgis.com";
 	esriConfig.assetsPath = "https://js.arcgis.com/4.30/@arcgis/core/assets";
 
 	(window as any).MAP_URL =
-		"https://services5.arcgis.com/N6Nhpnxaedla81he/arcgis/rest/services/QuickCaptureData/FeatureServer/0";
+		"https://services5.arcgis.com/N6Nhpnxaedla81he/arcgis/rest/services/Biodiversity_Point_new/FeatureServer";
 
 	const info = new OauthInfo({
 		appId: import.meta.env.PUBLIC_ARCGIS_APP_ID,
@@ -44,30 +49,42 @@ import Controls from "./Controls.astro";
 		throw error;
 	}
 
-	const map = new Map({
-		basemap: new Basemap({
-			baseLayers: [
-				new VectorTileLayer({
-					portalItem: {
-						id: "8a2cba3b0ebf4140b7c0dc5ee149549a",
-					},
-				}),
-			],
-		}),
+	const map = new Map();
+	const basemap = Basemap.fromId("gray-vector");
+	map.basemap = basemap;
+
+	const groupLayer = new GroupLayer({
+		effect: "drop-shadow(6px 6px 5px black)",
+		opacity: 1,
 		layers: [
-			new FeatureLayer({
-				url: (window as any).MAP_URL,
-				popupTemplate: {
-					title: "Information",
-					content: "Created by {CreatorName}",
-				},
+			new VectorTileLayer({
+				url: "https://basemaps.arcgis.com/arcgis/rest/services/OpenStreetMap_v2/VectorTileServer",
+				title: "Basemap Assessment",
+				style: "https://uoe.maps.arcgis.com/sharing/rest/content/items/ab632d914d9d46a7826d5ae61d11c1e4/resources/styles/root.json",
+			}),
+			new VectorTileLayer({
+				url: "https://vectortileservices5.arcgis.com/N6Nhpnxaedla81he/arcgis/rest/services/UOE_cookie_cutter_demo22/VectorTileServer",
+				title: "UoE Cookie Cutter",
+				blendMode: "destination-in",
 			}),
 		],
 	});
 
+	map.add(groupLayer);
+
+	const biodiversityLayer = new FeatureLayer({
+		url: "https://services5.arcgis.com/N6Nhpnxaedla81he/arcgis/rest/services/Biodiversity_Point_new/FeatureServer/0",
+		outFields: ["*"],
+		popupTemplate: {
+			title: "Biodiversity Point",
+		},
+	});
+
+	map.add(biodiversityLayer);
+
 	const view = new MapView({
 		container: "map",
-		map,
+		map: map,
 		center: [-3.534422, 50.736509],
 		zoom: 15,
 		ui: {

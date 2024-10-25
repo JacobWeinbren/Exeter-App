@@ -19,8 +19,8 @@
 
 	function createQuery(): __esri.Query {
 		const query = new FeatureLayer().createQuery();
-		query.where = `CreationDate >= '${new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()}'`;
-		query.outFields = ["CreatorName"];
+		query.where = `CreationTime >= '${new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()}'`;
+		query.outFields = ["CreatorID"];
 
 		return query;
 	}
@@ -31,7 +31,7 @@
 		const contributionCounts: Record<string, number> = {};
 
 		for (const feature of features) {
-			const name = feature.attributes?.CreatorName;
+			const name = feature.attributes?.CreatorID;
 			if (name) {
 				contributionCounts[name] = (contributionCounts[name] || 0) + 1;
 			}
