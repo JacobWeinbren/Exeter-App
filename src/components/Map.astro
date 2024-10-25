@@ -5,7 +5,7 @@ import Chart from "./Chart.astro";
 
 <div
 	id="map"
-	class="absolute top-0 left-0 w-full h-full transition-all moveable"
+	class="absolute top-0 left-0 bottom-0 right-0 w-full h-full transition-all moveable"
 >
 </div>
 <Controls />
@@ -24,6 +24,8 @@ import Chart from "./Chart.astro";
 	import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 	import $ from "jquery";
 	import { initControls } from "../scripts/controls.ts";
+	import SimpleRenderer from "@arcgis/core/renderers/SimpleRenderer";
+	import SimpleMarkerSymbol from "@arcgis/core/symbols/SimpleMarkerSymbol";
 
 	esriConfig.portalUrl = "https://uoe.maps.arcgis.com";
 	esriConfig.assetsPath = "https://js.arcgis.com/4.30/@arcgis/core/assets";
@@ -73,11 +75,21 @@ import Chart from "./Chart.astro";
 	map.add(groupLayer);
 
 	const biodiversityLayer = new FeatureLayer({
-		url: "https://services5.arcgis.com/N6Nhpnxaedla81he/arcgis/rest/services/Biodiversity_Point_new/FeatureServer/0",
+		url: (window as any).MAP_URL,
 		outFields: ["*"],
 		popupTemplate: {
 			title: "Biodiversity Point",
 		},
+		renderer: new SimpleRenderer({
+			symbol: new SimpleMarkerSymbol({
+				size: 5,
+				color: "#1abc9c",
+				outline: {
+					color: "#16a085",
+					width: 2,
+				},
+			}),
+		}),
 	});
 
 	map.add(biodiversityLayer);
@@ -102,7 +114,7 @@ import Chart from "./Chart.astro";
 		},
 	});
 
-	view.when().then(function () {
+	view.when(() => {
 		initControls(view);
 		$("#loading").fadeOut();
 		$("#mapContainer").fadeTo(150, 1);
