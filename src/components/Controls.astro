@@ -2,17 +2,7 @@
 import Leaderboard from "./Leaderboard.astro";
 ---
 
-<div class="absolute transition-all moveable top-2 left-2">
-	<button
-		id="leaderboardToggle"
-		class="flex items-center justify-center w-10 h-10 transition-all bg-white rounded-md sm:w-8 sm:h-8 hover:bg-gray-100 active:bg-gray-200"
-		aria-label="Toggle Leaderboard Visibility"
-	>
-		<i class="text-lg text-yellow-500 bi bi-trophy sm:text-base"></i>
-	</button>
-</div>
-
-<div class="absolute flex flex-col gap-2 top-2 right-2">
+<div class="absolute flex flex-col gap-2 transition-all moveable top-2 left-2">
 	<button
 		id="zoomIn"
 		class="flex items-center justify-center w-10 h-10 transition-all bg-white rounded-md sm:w-8 sm:h-8 hover:bg-gray-100 active:bg-gray-200"
@@ -27,6 +17,14 @@ import Leaderboard from "./Leaderboard.astro";
 		aria-label="Zoom Out"
 	>
 		<i class="text-lg bi bi-dash sm:text-base"></i>
+	</button>
+
+	<button
+		id="leaderboardToggle"
+		class="flex items-center justify-center w-10 h-10 transition-all bg-white rounded-md sm:w-8 sm:h-8 hover:bg-gray-100 active:bg-gray-200"
+		aria-label="Toggle Leaderboard Visibility"
+	>
+		<i class="text-lg text-yellow-500 bi bi-trophy sm:text-base"></i>
 	</button>
 </div>
 

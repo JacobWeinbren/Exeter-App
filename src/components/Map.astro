@@ -90,6 +90,13 @@ import Chart from "./Chart.astro";
 		ui: {
 			components: ["attribution"],
 		},
+		popup: {
+			dockEnabled: true,
+			dockOptions: {
+				position: "top-right",
+				breakpoint: false,
+			},
+		},
 	});
 
 	view.when().then(function () {
