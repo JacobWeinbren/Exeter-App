@@ -4,9 +4,11 @@
 
 <div
 	id="chartContainer"
-	class="moveable absolute bottom-6 left-2 right-0 h-[35vh] transition-all"
+	class="fixed left-2 bottom-0 right-0 h-[35vh] transition-all transform translate-y-full"
 >
-	<div class="w-[400px] h-full flex justify-left bg-white rounded-lg">
+	<div
+		class="w-[400px] moveable transition-all h-full flex justify-center bg-white rounded-lg"
+	>
 		<canvas id="chart"></canvas>
 	</div>
 </div>

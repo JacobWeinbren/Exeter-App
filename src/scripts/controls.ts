@@ -25,12 +25,12 @@ export function initControls(view: MapView) {
 	});
 
 	$("#leaderboardToggle").on("click", () => {
-		if ($("leaderboardContainer").hasClass("-translate-x-full")) {
-			view.popup.close();
-		}
-
 		$("#leaderboardContainer").toggleClass("-translate-x-full");
 		$(".moveable").toggleClass("translate-x-56");
 		$("#map, #chartContainer").toggleClass("brightness-75");
+	});
+
+	$("#chartToggle").on("click", () => {
+		$("#chartContainer").toggleClass("translate-y-full");
 	});
 }
