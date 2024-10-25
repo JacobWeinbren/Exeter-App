@@ -5,7 +5,7 @@ import Chart from "./Chart.astro";
 
 <div
 	id="map"
-	class="absolute top-0 left-0 w-full h-full transition-all moveable"
+	class="absolute top-0 left-0 w-screen h-screen transition-all moveable"
 >
 </div>
 <Controls />
@@ -54,7 +54,7 @@ import Chart from "./Chart.astro";
 	map.basemap = basemap;
 
 	const groupLayer = new GroupLayer({
-		effect: "drop-shadow(6px 6px 5px black)",
+		effect: "drop-shadow(6px 6px 6px black)",
 		opacity: 1,
 		layers: [
 			new VectorTileLayer({
@@ -96,6 +96,9 @@ import Chart from "./Chart.astro";
 				position: "top-right",
 				breakpoint: false,
 			},
+		},
+		constraints: {
+			snapToZoom: false,
 		},
 	});
 
