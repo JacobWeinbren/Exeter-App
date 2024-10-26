@@ -1,6 +1,7 @@
 ---
 import Controls from "./Controls.astro";
 import Chart from "./Chart.astro";
+import PopupBox from "./PopupBox.astro";
 ---
 
 <div
@@ -10,222 +11,34 @@ import Chart from "./Chart.astro";
 </div>
 <Controls />
 <Chart />
+<PopupBox />
 
 <script>
-	import esriConfig from "@arcgis/core/config";
-	import OauthInfo from "@arcgis/core/identity/OAuthInfo";
-	import IdentityManager from "@arcgis/core/identity/IdentityManager";
-	import Portal from "@arcgis/core/portal/Portal";
-	import Map from "@arcgis/core/Map";
-	import VectorTileLayer from "@arcgis/core/layers/VectorTileLayer";
-	import GroupLayer from "@arcgis/core/layers/GroupLayer";
-	import Basemap from "@arcgis/core/Basemap";
-	import MapView from "@arcgis/core/views/MapView";
-	import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 	import $ from "jquery";
-	import { initControls } from "../scripts/controls.ts";
-	import ClassBreaksRenderer from "@arcgis/core/renderers/ClassBreaksRenderer";
-	import SimpleMarkerSymbol from "@arcgis/core/symbols/SimpleMarkerSymbol";
-	import FieldInfo from "@arcgis/core/popup/FieldInfo";
-	import PopupTemplate from "@arcgis/core/PopupTemplate";
-	import FeatureReductionCluster from "@arcgis/core/layers/support/FeatureReductionCluster";
+	import { initConfig } from "../scripts/config";
+	import { createMap, createMapView } from "../scripts/mapSetup";
+	import { createClusterRenderer } from "../scripts/renderers";
+	import {
+		setupInteractions,
+		deactivateClickState,
+	} from "../scripts/interactionHandlers";
+	import { initControls } from "../scripts/controls";
 
-	esriConfig.portalUrl = "https://uoe.maps.arcgis.com";
-	esriConfig.assetsPath = "https://js.arcgis.com/4.30/@arcgis/core/assets";
+	await initConfig();
 
-	(window as any).MAP_URL =
-		"https://services5.arcgis.com/N6Nhpnxaedla81he/arcgis/rest/services/Biodiversity_Point_new/FeatureServer";
+	const { map, biodiversityLayer } = createMap();
+	const view = createMapView(map);
+	const clusterRenderer = createClusterRenderer();
 
-	const info = new OauthInfo({
-		appId: import.meta.env.PUBLIC_ARCGIS_APP_ID,
-		popup: false,
-		portalUrl: esriConfig.portalUrl,
-		authNamespace: "/",
-		flowType: "auto",
-	});
+	biodiversityLayer.renderer = clusterRenderer;
 
-	IdentityManager.registerOAuthInfos([info]);
+	setupInteractions(view, biodiversityLayer);
 
-	try {
-		await IdentityManager.getCredential(`${esriConfig.portalUrl}/sharing`);
-		await new Portal().load();
-	} catch (error) {
-		console.error(error);
-		throw error;
-	}
-
-	const map = new Map();
-	const basemap = Basemap.fromId("gray-vector");
-	map.basemap = basemap;
-
-	const groupLayer = new GroupLayer({
-		effect: "drop-shadow(6px 6px 6px black)",
-		opacity: 1,
-		layers: [
-			new VectorTileLayer({
-				url: "https://basemaps.arcgis.com/arcgis/rest/services/OpenStreetMap_v2/VectorTileServer",
-				title: "Basemap Assessment",
-				style: "https://uoe.maps.arcgis.com/sharing/rest/content/items/ab632d914d9d46a7826d5ae61d11c1e4/resources/styles/root.json",
-			}),
-			new VectorTileLayer({
-				url: "https://vectortileservices5.arcgis.com/N6Nhpnxaedla81he/arcgis/rest/services/UOE_cookie_cutter_demo22/VectorTileServer",
-				title: "UoE Cookie Cutter",
-				blendMode: "destination-in",
-			}),
-		],
-	});
-
-	map.add(groupLayer);
-
-	const clusterPopupTemplate = new PopupTemplate({
-		title: "Clustered Features",
-		content: "This cluster represents <b>{cluster_count}</b> features.",
-	});
-
-	const clusterConfig = {
-		type: "cluster",
-		clusterRadius: "40px",
-		popupTemplate: clusterPopupTemplate,
-		clusterMinSize: "20px",
-		clusterMaxSize: "60px",
-	};
-
-	const clusterRenderer = new ClassBreaksRenderer({
-		field: "cluster_count",
-		defaultSymbol: createClusterSymbol(8, "#1abc9c"),
-		classBreakInfos: [
-			{
-				minValue: 1,
-				maxValue: 5,
-				symbol: createClusterSymbol(10, "#1abc9c"),
-			},
-			{
-				minValue: 6,
-				maxValue: 10,
-				symbol: createClusterSymbol(30, "#9b59b6"),
-			},
-			{
-				minValue: 11,
-				maxValue: 15,
-				symbol: createClusterSymbol(40, "#e74c3c"),
-			},
-			{
-				minValue: 16,
-				maxValue: 20,
-				symbol: createClusterSymbol(50, "#f1c40f"),
-			},
-			{
-				minValue: 21,
-				maxValue: 25,
-				symbol: createClusterSymbol(60, "#e67e22"),
-			},
-			{
-				minValue: 26,
-				maxValue: 150,
-				symbol: createClusterSymbol(70, "#34495e"),
-			},
-		],
-	});
-
-	function createClusterSymbol(size: number, color: string) {
-		return new SimpleMarkerSymbol({
-			size: size,
-			color: color,
-			outline: {
-				color: "#ffffff",
-				width: 2,
-			},
-		});
-	}
-
-	const biodiversityLayer = new FeatureLayer({
-		url: (window as any).MAP_URL,
-		outFields: ["*"],
-		popupTemplate: {
-			title: "Biodiversity Point",
-		},
-		featureReduction: clusterConfig as any,
-		renderer: clusterRenderer,
-	});
-
-	const clusterFieldInfo = new FieldInfo({
-		fieldName: "cluster_count",
-		label: "Cluster Count",
-		format: {
-			digitSeparator: true,
-			places: 0,
-		},
-		visible: true,
-	});
-
-	const featureReductionCluster = new FeatureReductionCluster({
-		type: "cluster",
-		clusterRadius: "40px",
-		clusterMinSize: "5px",
-		clusterMaxSize: "50px",
-		popupTemplate: clusterPopupTemplate,
-	});
-
-	biodiversityLayer.featureReduction = featureReductionCluster;
-
-	map.add(biodiversityLayer);
-
-	const view = new MapView({
-		container: "map",
-		map: map,
-		center: [-3.534422, 50.736509],
-		zoom: 15,
-		ui: {
-			components: ["attribution"],
-		},
-		popup: {
-			dockEnabled: true,
-			dockOptions: {
-				position: "top-right",
-				breakpoint: false,
-			},
-		},
-		constraints: {
-			minZoom: 12,
-			snapToZoom: false,
-		},
-	});
+	(window as any).deactivateClickState = deactivateClickState;
 
 	view.when(() => {
 		initControls(view);
 		$("#loading").fadeOut();
 		$("#mapContainer").fadeTo(150, 1);
-
-		// Create custom legend
-		createCustomLegend();
 	});
-
-	function createCustomLegend() {
-		const legendItems = [
-			{ range: "1 - 5", color: "#1abc9c" },
-			{ range: "6 - 10", color: "#9b59b6" },
-			{ range: "11 - 15", color: "#e74c3c" },
-			{ range: "16 - 20", color: "#f1c40f" },
-			{ range: "21 - 25", color: "#e67e22" },
-			{ range: "26 +", color: "#34495e" },
-		];
-
-		const legendHtml = `
-			<h3 class="mb-1 text-sm font-semibold">Clusters</h3>
-			<div class="space-y-2">
-				${legendItems
-					.map(
-						(item) => `
-					<div class="flex items-center">
-						<div class="w-3 h-3 mr-2 rounded-full" style="background-color: ${item.color};"></div>
-						<span class="text-xs">${item.range}</span>
-					</div>
-				`
-					)
-					.join("")}
-			</div>
-		`;
-
-		$("#legend").append(legendHtml);
-	}
 </script>

@@ -1,0 +1,29 @@
+---
+
+---
+
+<div
+	id="popupBox"
+	class="absolute hidden p-2 bg-white rounded-lg top-2 right-2"
+>
+	<h3 id="popupTitle" class="mb-2 text-sm font-semibold"></h3>
+	<p id="popupContent" class="text-xs"></p>
+</div>
+
+<script>
+	import $ from "jquery";
+
+	function showPopup(title: string, content: string) {
+		$("#popupTitle").text(title);
+		$("#popupContent").text(content);
+		$("#popupBox").removeClass("hidden");
+	}
+
+	function hidePopup() {
+		$("#popupBox").addClass("hidden");
+	}
+
+	// Expose these functions to the global scope
+	(window as any).showPopup = showPopup;
+	(window as any).hidePopup = hidePopup;
+</script>
