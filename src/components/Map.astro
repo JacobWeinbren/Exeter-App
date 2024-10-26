@@ -26,6 +26,9 @@ import Chart from "./Chart.astro";
 	import { initControls } from "../scripts/controls.ts";
 	import SimpleRenderer from "@arcgis/core/renderers/SimpleRenderer";
 	import SimpleMarkerSymbol from "@arcgis/core/symbols/SimpleMarkerSymbol";
+	import FieldInfo from "@arcgis/core/popup/FieldInfo";
+	import PopupTemplate from "@arcgis/core/PopupTemplate";
+	import FeatureReductionCluster from "@arcgis/core/layers/support/FeatureReductionCluster";
 
 	esriConfig.portalUrl = "https://uoe.maps.arcgis.com";
 	esriConfig.assetsPath = "https://js.arcgis.com/4.30/@arcgis/core/assets";
@@ -92,23 +95,31 @@ import Chart from "./Chart.astro";
 		}),
 	});
 
-	biodiversityLayer.featureReduction = {
-		type: "cluster",
-		clusterRadius: 20,
-		clusterMaxSize: 20,
-		popupTemplate: {
-			content: "This cluster represents <b>{cluster_count}</b> features.",
-			fieldInfos: [
-				{
-					fieldName: "cluster_count",
-					format: {
-						digitSeparator: true,
-						places: 0,
-					},
-				},
-			],
+	const clusterFieldInfo = new FieldInfo({
+		fieldName: "cluster_count",
+		label: "Cluster Count",
+		format: {
+			digitSeparator: true,
+			places: 0,
 		},
-	};
+		visible: true,
+	});
+
+	const clusterPopupTemplate = new PopupTemplate({
+		title: "Clustered Features",
+		content: "This cluster represents <b>{cluster_count}</b> features.",
+		fieldInfos: [clusterFieldInfo],
+	});
+
+	const featureReductionCluster = new FeatureReductionCluster({
+		type: "cluster",
+		clusterRadius: "40px",
+		clusterMinSize: "5px",
+		clusterMaxSize: "50px",
+		popupTemplate: clusterPopupTemplate,
+	});
+
+	biodiversityLayer.featureReduction = featureReductionCluster;
 
 	map.add(biodiversityLayer);
 
