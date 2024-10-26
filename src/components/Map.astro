@@ -17,28 +17,34 @@ import PopupBox from "./PopupBox.astro";
 	import $ from "jquery";
 	import { initConfig } from "../scripts/config";
 	import { createMap, createMapView } from "../scripts/mapSetup";
-	import { createClusterRenderer } from "../scripts/renderers";
-	import {
-		setupInteractions,
-		deactivateClickState,
-	} from "../scripts/interactionHandlers";
 	import { initControls } from "../scripts/controls";
 
-	await initConfig();
+	let mapInitialized = false;
 
-	const { map, biodiversityLayer } = createMap();
-	const view = createMapView(map);
-	const clusterRenderer = createClusterRenderer();
+	async function initMap() {
+		if (mapInitialized) return;
 
-	biodiversityLayer.renderer = clusterRenderer;
+		try {
+			const token = await initConfig();
 
-	setupInteractions(view, biodiversityLayer);
+			const { map } = await createMap(token);
+			const view = await createMapView(map);
 
-	(window as any).deactivateClickState = deactivateClickState;
+			view.when(
+				() => {
+					initControls(view);
+					$("#loading").fadeOut();
+					$("#mapContainer").fadeTo(150, 1);
+					mapInitialized = true;
+				},
+				(error: Error) => {
+					console.error("Error initializing view:", error);
+				}
+			);
+		} catch (error) {
+			console.error("Error in map initialization:", error);
+		}
+	}
 
-	view.when(() => {
-		initControls(view);
-		$("#loading").fadeOut();
-		$("#mapContainer").fadeTo(150, 1);
-	});
+	initMap();
 </script>

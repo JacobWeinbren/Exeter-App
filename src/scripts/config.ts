@@ -27,8 +27,11 @@ export const initConfig = async () => {
 	IdentityManager.registerOAuthInfos([info]);
 
 	try {
-		await IdentityManager.getCredential(`${esriConfig.portalUrl}/sharing`);
+		const credential = await IdentityManager.getCredential(
+			`${esriConfig.portalUrl}/sharing`
+		);
 		await new Portal().load();
+		return credential.token;
 	} catch (error) {
 		console.error(error);
 		throw error;
