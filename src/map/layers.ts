@@ -129,11 +129,10 @@ const createBiodiversityLayer = (token: string) => {
 		url: `${(window as unknown as CustomWindow).MAP_URL}/0/query?f=geojson&where=1=1&outFields=*&token=${token}`,
 		renderer: new SimpleRenderer({
 			symbol: new SimpleMarkerSymbol({
-				size: 8,
+				size: 10,
 				color: [26, 188, 156, 1],
 				outline: {
-					color: [255, 255, 255, 0.5],
-					width: 0,
+					color: [0, 0, 0, 1],
 				},
 			}),
 		}),
