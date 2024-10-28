@@ -2,6 +2,7 @@
 
 ---
 
+{/* Popup box container with initial hidden state */}
 <div
 	id="popupBox"
 	class="absolute hidden p-2 bg-white rounded-lg top-2 right-2"
@@ -11,19 +12,22 @@
 </div>
 
 <script>
+	// Import jQuery library for DOM manipulation
 	import $ from "jquery";
 
+	// Displays popup with specified title and content
 	function showPopup(title: string, content: string) {
 		$("#popupTitle").text(title);
 		$("#popupContent").text(content);
 		$("#popupBox").removeClass("hidden");
 	}
 
+	// Hides the popup by adding hidden class
 	function hidePopup() {
 		$("#popupBox").addClass("hidden");
 	}
 
-	// Expose these functions to the global scope
+	// Make functions available globally for use outside this component
 	(window as any).showPopup = showPopup;
 	(window as any).hidePopup = hidePopup;
 </script>

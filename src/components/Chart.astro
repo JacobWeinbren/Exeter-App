@@ -2,6 +2,7 @@
 
 ---
 
+{/* Chart Container */}
 <div
 	id="chartContainer"
 	class="fixed left-2 pb-6 bottom-0 right-2 h-[35vh] transition-all transform translate-y-full"
@@ -9,6 +10,7 @@
 	<div
 		class="w-[400px] moveable transition-all h-full flex justify-center bg-white rounded-lg"
 	>
+		{/* Chart Canvas */}
 		<canvas id="chart"></canvas>
 	</div>
 </div>
@@ -16,8 +18,10 @@
 <script>
 	import { Chart } from "chart.js/auto";
 
+	// Initalise the canvas element
 	const ctx = document.getElementById("chart") as HTMLCanvasElement;
 
+	// Create new bar chart instance
 	new Chart(ctx, {
 		type: "bar",
 		data: {

@@ -2,14 +2,18 @@
 
 ---
 
+{/* Main leaderboard container */}
 <div id="leaderboard">
 	<div class="p-4">
+		{/* Leaderboard heading and timeframe */}
 		<h2 class="mb-2 text-xl font-bold text-center text-gray-600">
 			Contributor Leaderboard
 		</h2>
 		<p class="text-center text-blue-400 font-blue">Last 7 days</p>
 	</div>
+	{/* Divider line */}
 	<div class="h-px bg-gray-200"></div>
+	{/* Container for dynamically populated leaderboard items */}
 	<ol id="leaderboardList"></ol>
 </div>
 
@@ -17,6 +21,7 @@
 	import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 	import $ from "jquery";
 
+	// Creates a query to fetch contributions from the last 7 days
 	function createQuery(): __esri.Query {
 		const query = new FeatureLayer().createQuery();
 		query.where = `CreationTime >= '${new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()}'`;
@@ -25,6 +30,7 @@
 		return query;
 	}
 
+	// Tallies up the number of contributions per user
 	function countContributions(
 		features: __esri.Graphic[]
 	): Record<string, number> {
@@ -40,6 +46,7 @@
 		return contributionCounts;
 	}
 
+	// Sorts and returns the top N contributors
 	function getTopContributors(
 		leaderboard: Record<string, number>,
 		limit: number
@@ -54,28 +61,33 @@
 		return contributors.sort((a, b) => b.count - a.count).slice(0, limit);
 	}
 
+	// Initialises the leaderboard when the document is ready
 	$(async function () {
+		// Initialise the feature layer with the map URL
 		const featureLayer = new FeatureLayer({
 			url: (window as any).MAP_URL,
 		});
 		const query = createQuery();
 
+		// Fetch and process the contribution data
 		const results = await featureLayer.queryFeatures(query);
 		const leaderboard = countContributions(results.features);
 		const topContributors = getTopContributors(leaderboard, 10);
 
+		// Clear existing leaderboard entries
 		$("#leaderboardList").empty();
 
+		// Populate the leaderboard with the top contributors
 		topContributors.forEach(function (contributor, index) {
 			$("#leaderboardList").append(`
-                <li class="flex items-center justify-between p-4 transition-all rounded-lg hover:bg-gray-100">
-                    <div class="flex items-center space-x-2">
-                        <span class="text-sm font-bold text-gray-700">${index + 1}</span>
-                        <span class="text-sm font-bold text-gray-700">${contributor.name}</span>
-                    </div>
-                    <span class="text-sm text-gray-600">${contributor.count * 10} XP</span>
-                </li>
-            `);
+					<li class="flex items-center justify-between p-4 transition-all rounded-lg hover:bg-gray-100">
+						<div class="flex items-center space-x-2">
+							<span class="text-sm font-bold text-gray-700">${index + 1}</span>
+							<span class="text-sm font-bold text-gray-700">${contributor.name}</span>
+						</div>
+						<span class="text-sm text-gray-600">${contributor.count * 10} XP</span>
+					</li>
+				`);
 		});
 	});
 </script>

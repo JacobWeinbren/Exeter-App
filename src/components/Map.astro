@@ -1,35 +1,79 @@
 ---
+// Import required components and JSON data
 import Controls from "./Controls.astro";
 import Chart from "./Chart.astro";
 import PopupBox from "./PopupBox.astro";
+import styleJson from "../data/style.json";
+import rootJson from "../data/labels.json";
+
+// Remove label layers from the style configuration
+const filteredLayers = styleJson.layers.filter(
+	(layer) => !layer.id.includes("label")
+);
+
+// Customise text colours and styling for map labels
+const processedLayers = rootJson.layers.map((layer) => {
+	if (
+		layer.paint &&
+		(layer.paint["text-color"] || layer.paint["text-halo-color"])
+	) {
+		return {
+			...layer,
+			paint: {
+				...layer.paint,
+				"text-color": "#065c0e",
+				"text-halo-color": "#e5e5e5",
+				"text-halo-width": 1,
+			},
+		};
+	}
+	return layer;
+});
 ---
 
+<!-- Primary map container with moveable class -->
 <div
 	id="map"
 	class="absolute top-0 bottom-0 left-0 right-0 w-full h-full transition-all moveable"
 >
 </div>
+
+<!-- Hidden element to store JSON configuration data -->
+<div
+	id="mapData"
+	data-filtered-layers={JSON.stringify(filteredLayers)}
+	data-processed-layers={JSON.stringify(processedLayers)}
+	class="hidden"
+>
+</div>
+
+<!-- UI Component imports -->
 <Controls />
 <Chart />
 <PopupBox />
 
 <script>
+	// Import required modules and utilities
+	import { initConfig } from "../config";
+	import { createMap, createMapView } from "../map/core";
+	import { initControls } from "../controls";
 	import $ from "jquery";
-	import { initConfig } from "../scripts/config";
-	import { createMap, createMapView } from "../scripts/mapSetup";
-	import { initControls } from "../scripts/controls";
 
+	// Flag to prevent multiple initialisations
 	let mapInitialized = false;
 
 	async function initMap() {
 		if (mapInitialized) return;
 
 		try {
+			// Initialise configuration and retrieve authentication token
 			const token = await initConfig();
 
+			// Set up map instance and view
 			const { map } = await createMap(token);
 			const view = await createMapView(map);
 
+			// Handle view initialisation and UI setup
 			view.when(
 				() => {
 					initControls(view);
@@ -38,13 +82,14 @@ import PopupBox from "./PopupBox.astro";
 					mapInitialized = true;
 				},
 				(error: Error) => {
-					console.error("Error initializing view:", error);
+					console.error("Error initialising view:", error);
 				}
 			);
 		} catch (error) {
-			console.error("Error in map initialization:", error);
+			console.error("Error in map initialisation:", error);
 		}
 	}
 
+	// Begin map initialisation process
 	initMap();
 </script>
