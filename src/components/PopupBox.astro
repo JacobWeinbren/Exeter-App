@@ -5,26 +5,25 @@
 {/* Popup box container with initial hidden state */}
 <div
 	id="popupBox"
-	class="absolute hidden p-2 bg-white rounded-lg top-2 right-2"
+	class="absolute p-2 transition-all translate-y-full bottom-[-100%] bg-white rounded-lg right-2"
 >
 	<h3 id="popupTitle" class="mb-2 font-semibold"></h3>
 	<p id="popupContent" class="text-sm"></p>
 </div>
 
 <script>
-	// Import jQuery library for DOM manipulation
 	import $ from "jquery";
 
 	// Displays popup with specified title and content
 	function showPopup(title: string, content: string) {
 		$("#popupTitle").text(title);
 		$("#popupContent").text(content);
-		$("#popupBox").removeClass("hidden");
+		$("#popupBox").removeClass("translate-y-full").css("bottom", "1.5rem");
 	}
 
 	// Hides the popup by adding hidden class
 	function hidePopup() {
-		$("#popupBox").addClass("hidden");
+		$("#popupBox").addClass("translate-y-full").css("bottom", "-1.5rem");
 	}
 
 	// Make functions available globally for use outside this component

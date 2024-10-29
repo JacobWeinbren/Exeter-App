@@ -2,45 +2,48 @@
 import Leaderboard from "./Leaderboard.astro";
 ---
 
-{/* Main controls container - positioned absolutely in top-left corner */}
-<div class="absolute flex flex-col gap-2 transition-all moveable top-2 left-2">
+{/* Main controls container */}
+<div
+	class="absolute flex flex-col items-end gap-2 transition-all top-2 right-2"
+>
 	{/* Zoom controls */}
 	<button
 		id="zoomIn"
-		class="flex items-center justify-center w-10 h-10 transition-all bg-white rounded-md sm:w-8 sm:h-8 hover:bg-gray-100 active:bg-gray-200"
+		class="flex items-center justify-center w-8 h-8 transition-all bg-white rounded-md hover:bg-gray-100 active:bg-gray-200"
 		aria-label="Zoom In"
 	>
-		<i class="text-lg bi bi-plus sm:text-base"></i>
+		<i class="text-lg bi bi-plus"></i>
 	</button>
 
 	<button
 		id="zoomOut"
-		class="flex items-center justify-center w-10 h-10 transition-all bg-white rounded-md sm:w-8 sm:h-8 hover:bg-gray-100 active:bg-gray-200"
+		class="flex items-center justify-center w-8 h-8 transition-all bg-white rounded-md hover:bg-gray-100 active:bg-gray-200"
 		aria-label="Zoom Out"
 	>
-		<i class="text-lg bi bi-dash sm:text-base"></i>
+		<i class="text-lg bi bi-dash"></i>
 	</button>
 
-	{/* Trophy icon - toggles leaderboard visibility */}
+	{/* Toggles leaderboard visibility */}
 	<button
 		id="leaderboardToggle"
-		class="flex items-center justify-center w-10 h-10 transition-all bg-white rounded-md sm:w-8 sm:h-8 hover:bg-gray-100 active:bg-gray-200"
+		class="flex items-center justify-center w-8 h-8 transition-all bg-white rounded-md hover:bg-gray-100 active:bg-gray-200"
 		aria-label="Toggle Leaderboard Visibility"
 	>
-		<i class="text-lg text-yellow-500 bi bi-trophy sm:text-base"></i>
+		<i class="text-lg text-yellow-500 bi bi-trophy"></i>
 	</button>
 
-	{/* Chart icon - toggles chart visibility */}
+	{/* Toggles chart visibility */}
 	<button
 		id="chartToggle"
-		class="flex items-center justify-center w-10 h-10 transition-all bg-white rounded-md sm:w-8 sm:h-8 hover:bg-gray-100 active:bg-gray-200"
+		class="flex items-center justify-center w-8 h-8 transition-all bg-white rounded-md hover:bg-gray-100 active:bg-gray-200"
 		aria-label="Toggle Chart Visibility"
 	>
-		<i class="text-lg text-teal-500 bi bi-bar-chart sm:text-base"></i>
+		<i class="text-lg text-teal-500 bi bi-bar-chart"></i>
 	</button>
+</div>
 
-	{/* Legend container for cluster colours */}
-	<div id="legend" class="p-2 bg-white rounded-lg"></div>
+{/* Legend container for cluster colours */}
+<div id="legend" class="absolute p-2 bg-white rounded-lg moveable top-2 left-2">
 </div>
 
 {/* Leaderboard container - starts hidden off-screen to the left */}
@@ -57,12 +60,9 @@ import Leaderboard from "./Leaderboard.astro";
 	$(function () {
 		// Define colour ranges for different cluster sizes
 		const legendItems = [
-			{ range: "1 - 5", colour: "#1abc9c" },
-			{ range: "6 - 10", colour: "#9b59b6" },
-			{ range: "11 - 15", colour: "#e74c3c" },
-			{ range: "16 - 20", colour: "#f1c40f" },
-			{ range: "21 - 25", colour: "#e67e22" },
-			{ range: "26 +", colour: "#34495e" },
+			{ range: "Conservation", colour: "#1abc9c" },
+			{ range: "Restoration", colour: "#9b59b6" },
+			{ range: "Species", colour: "#e74c3c" },
 		];
 
 		// Generate HTML for the legend using template literals

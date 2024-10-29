@@ -31,9 +31,6 @@ function handlePointerMove(
 				hoveredFeature = feature;
 				showPopupForFeature(feature);
 			}
-		} else {
-			hoveredFeature = null;
-			(window as unknown as CustomWindow).hidePopup();
 		}
 	});
 }
@@ -42,7 +39,6 @@ function handleClick(event: any, view: __esri.MapView) {
 	view.hitTest(event).then((response) => {
 		const feature = getFeatureFromHitTest(response);
 
-		// Clear any existing highlighted features
 		clearExistingHighlight();
 
 		// Handle click on GeoJSON features
