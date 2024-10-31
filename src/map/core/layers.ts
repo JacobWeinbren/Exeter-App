@@ -4,9 +4,8 @@ import GroupLayer from "@arcgis/core/layers/GroupLayer";
 import GeoJSONLayer from "@arcgis/core/layers/GeoJSONLayer";
 import SimpleRenderer from "@arcgis/core/renderers/SimpleRenderer";
 import { SimpleFillSymbol, SimpleMarkerSymbol } from "@arcgis/core/symbols";
-import type { CustomWindow } from "../types";
+import { type CustomWindow } from "@/types";
 
-// Sets up and returns all map layers required for initialisation
 export const setupMapLayers = async (token: string) => {
 	const mapDataEl = document.getElementById("mapData");
 	const filteredLayers = JSON.parse(
@@ -15,15 +14,12 @@ export const setupMapLayers = async (token: string) => {
 	const processedLayers = JSON.parse(
 		mapDataEl?.dataset.processedLayers || "[]"
 	);
-
 	const basemap = createBasemap();
 	const groupLayer = createMainGroupLayer(filteredLayers, processedLayers);
 	const biodiversityLayer = createBiodiversityLayer(token);
-
 	return { basemap, groupLayer, biodiversityLayer };
 };
 
-// Creates the base OpenStreetMap tiles with standard styling
 const createBasemap = () => {
 	return new Basemap({
 		baseLayers: [
@@ -38,8 +34,6 @@ const createBasemap = () => {
 		],
 	});
 };
-
-// Organises all map layers into a grouped structure with shadow effects
 const createMainGroupLayer = (baseMapLayers: any[], labelLayers: any[]) => {
 	return new GroupLayer({
 		effect: "drop-shadow(6px 6px 6px black)",
@@ -53,7 +47,6 @@ const createMainGroupLayer = (baseMapLayers: any[], labelLayers: any[]) => {
 	});
 };
 
-// Generates the customised vector tile layer for the base map visualisation
 const createBaseMapVectorLayer = (layers: any[]) => {
 	return new VectorTileLayer({
 		url: "https://basemaps.arcgis.com/arcgis/rest/services/OpenStreetMap_v2/VectorTileServer",
@@ -73,7 +66,6 @@ const createBaseMapVectorLayer = (layers: any[]) => {
 	});
 };
 
-// Renders building polygons with grey styling and shadow effects
 const createBuildingsLayer = () => {
 	return new GeoJSONLayer({
 		url: "/Exeter-App/clipped.geojson",
@@ -94,8 +86,6 @@ const createBuildingsLayer = () => {
 		popupEnabled: false,
 	});
 };
-
-// Creates a mask layer to clip the map to the university campus boundary
 const createCookieCutterLayer = () => {
 	return new VectorTileLayer({
 		url: "https://vectortileservices5.arcgis.com/N6Nhpnxaedla81he/arcgis/rest/services/UOE_cookie_cutter_demo22/VectorTileServer",
@@ -104,7 +94,6 @@ const createCookieCutterLayer = () => {
 	});
 };
 
-// Adds text labels and POI markers on top of the base map
 const createLabelsVectorLayer = (layers: any[]) => {
 	return new VectorTileLayer({
 		url: "https://basemaps.arcgis.com/arcgis/rest/services/OpenStreetMap_v2/VectorTileServer",
@@ -123,7 +112,6 @@ const createLabelsVectorLayer = (layers: any[]) => {
 	});
 };
 
-// Displays biodiversity survey points as coloured markers
 const createBiodiversityLayer = (token: string) => {
 	return new GeoJSONLayer({
 		url: `${(window as unknown as CustomWindow).MAP_URL}/0/query?f=geojson&where=1=1&outFields=*&token=${token}`,

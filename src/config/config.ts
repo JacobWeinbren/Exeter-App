@@ -2,32 +2,28 @@ import esriConfig from "@arcgis/core/config";
 import OauthInfo from "@arcgis/core/identity/OAuthInfo";
 import IdentityManager from "@arcgis/core/identity/IdentityManager";
 import Portal from "@arcgis/core/portal/Portal";
-import { type CustomWindow } from "../types";
+import { type CustomWindow } from "@/types";
 
-// Initialise ArcGIS configuration and authentication
+const MAP_URL =
+	"https://services5.arcgis.com/N6Nhpnxaedla81he/arcgis/rest/services/Biodiversity_Point_new/FeatureServer";
+
 export const initConfig = async () => {
 	setupEsriConfig();
 	setupMapUrl();
-
 	const info = createOAuthInfo();
 	IdentityManager.registerOAuthInfos([info]);
-
 	return await authenticate();
 };
 
-// Configure base portal URL and assets path for ArcGIS
 function setupEsriConfig() {
 	esriConfig.portalUrl = "https://uoe.maps.arcgis.com";
 	esriConfig.assetsPath = "https://js.arcgis.com/4.30/@arcgis/core/assets";
 }
 
-// Set the feature service URL for the biodiversity map layer
 function setupMapUrl() {
-	(window as unknown as CustomWindow).MAP_URL =
-		"https://services5.arcgis.com/N6Nhpnxaedla81he/arcgis/rest/services/Biodiversity_Point_new/FeatureServer";
+	(window as unknown as CustomWindow).MAP_URL = MAP_URL;
 }
 
-// Create OAuth configuration for ArcGIS authentication
 function createOAuthInfo() {
 	return new OauthInfo({
 		appId: import.meta.env.PUBLIC_ARCGIS_APP_ID,
@@ -38,7 +34,6 @@ function createOAuthInfo() {
 	});
 }
 
-// Authenticate with ArcGIS portal and return access token
 async function authenticate() {
 	try {
 		const credential = await IdentityManager.getCredential(

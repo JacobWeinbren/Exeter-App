@@ -10,23 +10,3 @@
 	<h3 id="popupTitle" class="mb-2 font-semibold"></h3>
 	<p id="popupContent" class="text-sm"></p>
 </div>
-
-<script>
-	import $ from "jquery";
-
-	// Displays popup with specified title and content
-	function showPopup(title: string, content: string) {
-		$("#popupTitle").text(title);
-		$("#popupContent").text(content);
-		$("#popupBox").removeClass("translate-y-full").css("bottom", "1.5rem");
-	}
-
-	// Hides the popup by adding hidden class
-	function hidePopup() {
-		$("#popupBox").addClass("translate-y-full").css("bottom", "-1.5rem");
-	}
-
-	// Make functions available globally for use outside this component
-	(window as any).showPopup = showPopup;
-	(window as any).hidePopup = hidePopup;
-</script>

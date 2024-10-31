@@ -3,8 +3,8 @@
 import Controls from "./Controls.astro";
 import Chart from "./Chart.astro";
 import PopupBox from "./PopupBox.astro";
-import styleJson from "../data/style.json";
-import rootJson from "../data/labels.json";
+import styleJson from "@/data/style.json";
+import rootJson from "@/data/labels.json";
 
 // Remove label layers from the style configuration
 const filteredLayers = styleJson.layers.filter(
@@ -54,16 +54,16 @@ const processedLayers = rootJson.layers.map((layer) => {
 
 <script>
 	// Import required modules and utilities
-	import { initConfig } from "../config";
-	import { createMap, createMapView } from "../map/core";
-	import { initControls } from "../controls";
+	import { initConfig } from "@/config/config";
+	import { createMap, createMapView } from "@/map/core/map";
+	import { initControls } from "@/utils/controls";
 	import $ from "jquery";
 
 	// Flag to prevent multiple initialisations
-	let mapInitialized = false;
+	let mapInitialised = false;
 
 	async function initMap() {
-		if (mapInitialized) return;
+		if (mapInitialised) return;
 
 		try {
 			// Initialise configuration and retrieve authentication token
@@ -79,7 +79,7 @@ const processedLayers = rootJson.layers.map((layer) => {
 					initControls(view);
 					$("#loading").fadeOut();
 					$("#mapContainer").fadeTo(150, 1);
-					mapInitialized = true;
+					mapInitialised = true;
 				},
 				(error: Error) => {
 					console.error("Error initialising view:", error);

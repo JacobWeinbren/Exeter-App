@@ -1,20 +1,20 @@
 export interface CustomWindow extends Window {
 	MAP_URL: string;
-	showPopup: (title: string, content: string) => void;
-	hidePopup: () => void;
-	clickHighlight: any;
+	clickHighlight: __esri.Handle | null;
 }
 
-export interface BiodiversityFeature {
-	type: "Feature";
-	geometry: {
-		type: "Point";
-		coordinates: [number, number];
-	};
-	properties: {
-		OBJECTID: string;
-		cluster_count?: number;
-	};
+export interface BiodiversityPoint {
+	OBJECTID: string;
+	cluster_count?: number;
+	CreatorID?: string;
+	coordinates: [number, number];
+}
+
+export interface LegendItem {
+	text: string;
+	emoji: string;
+	count: number;
+	colour: string;
 }
 
 export interface PopupData {
