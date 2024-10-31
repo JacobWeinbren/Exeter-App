@@ -11,8 +11,9 @@ export const initControls = (view: MapView): void => {
 	$("#chartToggle").on("click", toggleChart);
 	$("#legendToggle").on("click", toggleLegend);
 
-	// Initialise resize handler
+	// Initialise resize handler and run it immediately
 	$(window).on("resize", handleResize);
+	handleResize();
 };
 
 // Simple zoom function with animation
@@ -56,6 +57,10 @@ const handleResize = (): void => {
 	} else if (!legend.hasClass("is-visible")) {
 		legend.addClass(translateClass);
 	}
+
+	setTimeout(() => {
+		legend.addClass("transition-all");
+	}, 150);
 };
 
 const toggleLegend = (): void => {
