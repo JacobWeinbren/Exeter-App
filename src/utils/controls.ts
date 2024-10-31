@@ -54,13 +54,10 @@ const handleResize = (): void => {
 
 	if (isLargeScreen) {
 		legend.removeClass(translateClass);
+		legend.addClass("transition-all");
 	} else if (!legend.hasClass("is-visible")) {
 		legend.addClass(translateClass);
 	}
-
-	setTimeout(() => {
-		legend.addClass("transition-all");
-	}, 150);
 };
 
 const toggleLegend = (): void => {
