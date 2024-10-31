@@ -29,6 +29,7 @@ const toggleLeaderboard = (): void => {
 	const leaderboard = $("#leaderboardContainer");
 	const isShowing = leaderboard.hasClass("-translate-x-full");
 	const isLargeScreen = window.innerWidth >= 1024;
+	const legendTranslateClass = "-translate-y-[calc(100%+0.5rem)]";
 
 	// Toggle leaderboard and adjust related elements
 	leaderboard.toggleClass("-translate-x-full");
@@ -37,9 +38,10 @@ const toggleLeaderboard = (): void => {
 
 	// Handle chart and legend visibility
 	if (isShowing) {
-		$("#chartContainer, #legend").addClass("translate-y-full");
+		$("#chartContainer").addClass("translate-y-full");
+		$("#legend").addClass(legendTranslateClass);
 	} else {
-		if (isLargeScreen) $("#legend").removeClass("translate-y-full");
+		if (isLargeScreen) $("#legend").removeClass(legendTranslateClass);
 		$("#chartContainer").addClass("translate-y-full");
 	}
 };
