@@ -22,10 +22,15 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 			href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap"
 			rel="stylesheet"
 		/>
+		<meta name="apple-mobile-web-app-capable" content="yes" />
 	</head>
 	<body class="w-full h-full font-sans select-none overflow-hidden p-0 m-0">
 		<div>
-			<div id="mapContainer" class="opacity-0">
+			<div
+				id="mapContainer"
+				class="opacity-0"
+				style="touch-action: none;"
+			>
 				<MapComponent />
 			</div>
 			<div
