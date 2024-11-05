@@ -26,30 +26,6 @@ const legendItems = [
 		],
 	},
 	{
-		id: "restoration",
-		label: "Restoration",
-		subpoints: [
-			{
-				text: "Insect Shelters",
-				emoji: "🐝",
-				count: 20,
-				colour: "#EF4444",
-			},
-			{
-				text: "Small Mammal Homes",
-				emoji: "🦊",
-				count: 6,
-				colour: "#8B5CF6",
-			},
-			{
-				text: "Natural Debris",
-				emoji: "🍂",
-				count: 18,
-				colour: "#6366F1",
-			},
-		],
-	},
-	{
 		id: "species",
 		label: "Species",
 		subpoints: [
@@ -66,7 +42,7 @@ const legendItems = [
 
 export function initLegend() {
 	const legendHtml = `
-    <h3 class="mb-3 text-sm font-semibold">Wildly Accurate - Biodiversity Interventions</h3>
+    <h3 class="mb-3 text-sm font-semibold">Wildly Accurate</h3>
     <div class="flex flex-wrap gap-2 mb-3">
       ${legendItems
 			.map(
