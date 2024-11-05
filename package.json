@@ -12,6 +12,7 @@
   "dependencies": {
     "@arcgis/core": "^4.30.9",
     "@astrojs/check": "^0.9.4",
+    "@astrojs/cloudflare": "^11.2.0",
     "@astrojs/tailwind": "^5.1.2",
     "astro": "^4.16.7",
     "bootstrap-icons": "^1.11.3",
