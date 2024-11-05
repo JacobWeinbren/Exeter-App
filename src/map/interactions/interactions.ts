@@ -1,55 +1,64 @@
 import { showPopup, hidePopup } from "@/features/popup/popup";
 import { highlightFeature, clearExistingHighlight } from "./highlight";
+import maplibregl from "maplibre-gl";
 
 type InteractionMode = "hover" | "click";
 let currentMode: InteractionMode = "hover";
 let selectedPointId: string | null = null;
 
-export const setupInteractions = (view: __esri.MapView): void => {
-	view.on("pointer-move", (event) => handlePointerMove(event, view));
-	view.on("click", (event) => handleClick(event, view));
+export const setupInteractions = (map: maplibregl.Map): void => {
+	map.on("mousemove", "biodiversity", (e) => handlePointerMove(e, map));
+	map.on("click", "biodiversity", (e) => handleClick(e, map));
+	map.on("click", (e) => handleMapClick(e, map));
+	map.on("mouseleave", "biodiversity", () => {
+		if (currentMode === "hover") {
+			hidePopup();
+		}
+	});
 };
 
-const handlePointerMove = async (
-	event: any,
-	view: __esri.MapView
-): Promise<void> => {
+const handlePointerMove = (event: any, map: maplibregl.Map): void => {
 	if (currentMode === "click") return;
 
-	const feature = await getFeatureFromEvent(event, view);
-	if (feature?.layer?.type === "geojson") {
+	const feature = event.features[0];
+	if (feature) {
 		showPopupForFeature(feature);
 	}
 };
 
-const handleClick = async (event: any, view: __esri.MapView): Promise<void> => {
-	const feature = await getFeatureFromEvent(event, view);
-	clearExistingHighlight();
+const handleClick = (event: any, map: maplibregl.Map): void => {
+	const feature = event.features[0];
 
-	if (feature?.layer?.type === "geojson") {
+	if (feature) {
 		currentMode = "click";
-		selectedPointId = feature.attributes.OBJECTID;
+		selectedPointId = feature.properties.OBJECTID;
 		showPopupForFeature(feature);
-		highlightFeature(feature, view);
+		highlightFeature(feature, map);
 	} else {
 		currentMode = "hover";
 		selectedPointId = null;
 		hidePopup();
+		clearExistingHighlight(map);
 	}
 };
 
-const getFeatureFromEvent = async (
-	event: any,
-	view: __esri.MapView
-): Promise<__esri.Graphic | undefined> => {
-	const response = await view.hitTest(event);
-	const result = response.results[0];
-	return result && "graphic" in result ? result.graphic : undefined;
+const handleMapClick = (event: any, map: maplibregl.Map): void => {
+	const features = map.queryRenderedFeatures(event.point, {
+		layers: ["biodiversity"],
+	});
+
+	if (features.length === 0) {
+		console.log("Clicked outside features");
+		currentMode = "hover";
+		selectedPointId = null;
+		hidePopup();
+		clearExistingHighlight(map);
+	}
 };
 
-const showPopupForFeature = (feature: __esri.Graphic): void => {
-	const count = feature.attributes.cluster_count || 1;
-	const title = `Biodiversity Point ${feature.attributes.OBJECTID}`;
+const showPopupForFeature = (feature: any): void => {
+	const count = feature.properties.cluster_count || 1;
+	const title = `Biodiversity Point ${feature.properties.OBJECTID}`;
 	const content = `Number of observations: ${count}`;
 	showPopup(title, content);
 };

@@ -80,18 +80,16 @@ export const createMap = async (token: string) => {
 		);
 
 		map.addLayer({
-			id: "biodiversity-2d",
+			id: "biodiversity",
 			type: "circle",
 			source: "biodiversity-points",
 			paint: {
-				"circle-radius": 4,
+				"circle-radius": 5,
 				"circle-color": "#4CAF50",
-				"circle-opacity": [
-					"case",
-					["within", exeterMultiPolygon],
-					0.7,
-					0,
-				],
+				"circle-opacity": 1,
+				"circle-stroke-width": 2,
+				"circle-stroke-color": "#fff",
+				"circle-stroke-opacity": 0,
 			},
 		});
 

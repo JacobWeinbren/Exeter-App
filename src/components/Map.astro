@@ -100,6 +100,7 @@ const mask = turf.mask(
 	import { initConfig } from "@/config/config";
 	import { createMap } from "@/map/core/map";
 	import { initControls } from "@/utils/controls";
+	import { setupInteractions } from "@/map/interactions/interactions";
 	import $ from "jquery";
 
 	async function initMap() {
@@ -109,6 +110,7 @@ const mask = turf.mask(
 
 			map.on("load", () => {
 				initControls(map);
+				setupInteractions(map);
 				$("#loading").hide();
 				$("#mapContainer").show();
 			});
