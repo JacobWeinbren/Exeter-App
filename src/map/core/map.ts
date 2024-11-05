@@ -24,6 +24,8 @@ export const createMap = async (token: string): Promise<maplibregl.Map> => {
 	(window as unknown as CustomWindow).map = map;
 
 	map.on("style.load", async () => {
+		map.getCanvas().style.cursor = "crosshair";
+
 		map.addSource("inverse-mask", {
 			type: "geojson",
 			data: mask,
