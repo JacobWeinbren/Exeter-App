@@ -88,7 +88,7 @@ export const createMap = async (token: string): Promise<maplibregl.Map> => {
 						20,
 					],
 					"fill-extrusion-base": 0,
-					"fill-extrusion-opacity": 0.7,
+					"fill-extrusion-opacity": 0,
 				},
 			},
 			firstSymbolId
