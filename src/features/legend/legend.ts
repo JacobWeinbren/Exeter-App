@@ -64,6 +64,11 @@ export function initLegend() {
 					(subpoint) => `
             <div class="flex items-center justify-between gap-2 ml-2">
               <div class="flex items-center gap-2 text-sm">
+                <input type="checkbox" class="subpoint-checkbox" 
+                  data-category="${item.id}" 
+                  data-text="${subpoint.text}"
+                  checked
+                >
                 <span class="w-1.5 h-1.5 rounded-full" style="background-color: ${subpoint.colour};"></span>
                 <span>${subpoint.text} ${subpoint.emoji}</span>
               </div>
@@ -89,6 +94,19 @@ export function initLegend() {
 	$('.category-btn[data-category="conservation"]').addClass(
 		"ring-2 ring-offset-2"
 	);
+
+	$(".subpoint-checkbox").on("change", function () {
+		const category = $(this).data("category");
+		const text = $(this).data("text");
+		const isChecked = $(this).is(":checked");
+
+		// Emit a custom event that the map can listen to
+		$(document).trigger("subpoint-visibility-changed", {
+			category,
+			text,
+			visible: isChecked,
+		});
+	});
 
 	$(".category-btn").on("click", function () {
 		const category = $(this).data("category");
