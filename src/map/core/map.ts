@@ -1,6 +1,8 @@
+import type { CustomWindow } from "@/types";
 import maplibregl from "maplibre-gl";
+import { initLeaderboard } from "@/features/leaderboard/leaderboard";
 
-export const createMap = async (token: string) => {
+export const createMap = async (token: string): Promise<maplibregl.Map> => {
 	const mapData = JSON.parse(
 		document.getElementById("mapData")?.dataset.processed || "{}"
 	);
@@ -18,7 +20,10 @@ export const createMap = async (token: string) => {
 		antialias: true,
 	});
 
-	map.on("style.load", () => {
+	// Store map in window object
+	(window as unknown as CustomWindow).map = map;
+
+	map.on("style.load", async () => {
 		map.addSource("inverse-mask", {
 			type: "geojson",
 			data: mask,
@@ -29,9 +34,18 @@ export const createMap = async (token: string) => {
 			data: JSON.parse(clippedGeojson),
 		});
 
+		// Fetch and store biodiversity data
+		const biodiversityUrl = `https://services5.arcgis.com/N6Nhpnxaedla81he/arcgis/rest/services/Biodiversity_Point_new/FeatureServer/0/query?f=geojson&where=1=1&outFields=*&token=${token}`;
+		const response = await fetch(biodiversityUrl);
+		const biodiversityData = await response.json();
+		console.log(biodiversityData);
+		(window as unknown as CustomWindow).biodiversityData = biodiversityData;
+
+		initLeaderboard();
+
 		map.addSource("biodiversity-points", {
 			type: "geojson",
-			data: `https://services5.arcgis.com/N6Nhpnxaedla81he/arcgis/rest/services/Biodiversity_Point_new/FeatureServer/0/query?f=geojson&where=1=1&token=${token}`,
+			data: biodiversityData,
 		});
 
 		// Add OSM vector source for labels

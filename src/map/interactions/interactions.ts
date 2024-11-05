@@ -48,7 +48,6 @@ const handleMapClick = (event: any, map: maplibregl.Map): void => {
 	});
 
 	if (features.length === 0) {
-		console.log("Clicked outside features");
 		currentMode = "hover";
 		selectedPointId = null;
 		hidePopup();

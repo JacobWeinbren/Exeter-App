@@ -1,17 +1,25 @@
-import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import $ from "jquery";
+import type { CustomWindow } from "@/types";
 
 export const initLeaderboard = async (): Promise<void> => {
-	const featureLayer = new FeatureLayer({ url: (window as any).MAP_URL });
-	const query = new FeatureLayer().createQuery();
-	query.where = `CreationTime >= '${new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()}'`;
-	query.outFields = ["CreatorID"];
+	const customWindow = window as unknown as CustomWindow;
+	const geojsonData = customWindow.biodiversityData;
 
-	const results = await featureLayer.queryFeatures(query);
+	if (!geojsonData) {
+		console.error("Biodiversity data not loaded");
+		return;
+	}
+
+	// Calculate contributions from the last 7 days
+	const sevenDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+	const recentFeatures = geojsonData.features.filter(
+		(feature) => feature.properties?.CreationTime >= sevenDaysAgo
+	);
+
 	const contributors = Object.entries(
-		results.features.reduce(
+		recentFeatures.reduce(
 			(acc, feature) => {
-				const name = feature.attributes?.CreatorID;
+				const name = feature.properties?.CreatorID;
 				if (name) acc[name] = (acc[name] || 0) + 1;
 				return acc;
 			},
@@ -26,7 +34,7 @@ export const initLeaderboard = async (): Promise<void> => {
 		contributors
 			.map(
 				(contributor, index) => `
-            <li class="flex items-center justify-between p-4 transition-all rounded-lg hover:bg-gray-100">
+            <li class="flex items-center justify-between p-2 transition-all rounded-lg hover:bg-gray-100">
                 <div class="flex items-center space-x-2">
                     <span class="text-sm font-bold text-gray-700">${index + 1}</span>
                     <span class="text-sm font-bold text-gray-700">${contributor.name}</span>
