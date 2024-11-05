@@ -8,7 +8,7 @@ export const createMap = async (token: string): Promise<maplibregl.Map> => {
 	);
 	const { mask, clippedGeojson, exeterMultiPolygon } = mapData;
 
-	const basemapEnum = "ab632d914d9d46a7826d5ae61d11c1e4";
+	const basemapEnum = "9f7e19f3e4804409918d9513570a011b";
 
 	const map = new maplibregl.Map({
 		container: "map",
