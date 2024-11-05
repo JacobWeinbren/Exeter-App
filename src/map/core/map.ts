@@ -22,6 +22,7 @@ export const createMap = async (token: string): Promise<maplibregl.Map> => {
 
 	// Store map in window object
 	(window as unknown as CustomWindow).map = map;
+	(window as unknown as CustomWindow).token = token;
 
 	map.on("style.load", async () => {
 		map.getCanvas().style.cursor = "crosshair";

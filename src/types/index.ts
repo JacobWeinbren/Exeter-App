@@ -1,6 +1,5 @@
 export interface CustomWindow extends Window {
-	MAP_URL: string;
-	TOKEN: string;
+	token: string;
 	map: maplibregl.Map | null;
 	biodiversityData: GeoJSON.FeatureCollection | null;
 	clickHighlight: __esri.Handle | null;
