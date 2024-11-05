@@ -40,7 +40,6 @@ export const createMap = async (token: string): Promise<maplibregl.Map> => {
 		const biodiversityUrl = `https://services5.arcgis.com/N6Nhpnxaedla81he/arcgis/rest/services/Biodiversity_Point_new/FeatureServer/0/query?f=geojson&where=1=1&outFields=*&token=${token}`;
 		const response = await fetch(biodiversityUrl);
 		const biodiversityData = await response.json();
-		console.log(biodiversityData);
 		(window as unknown as CustomWindow).biodiversityData = biodiversityData;
 
 		initLeaderboard();
