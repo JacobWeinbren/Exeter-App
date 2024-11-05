@@ -1,10 +1,14 @@
-import MapView from "@arcgis/core/views/MapView";
+import maplibregl from "maplibre-gl";
 import $ from "jquery";
 
-export const initControls = (view: MapView): void => {
+export const initControls = (map: maplibregl.Map): void => {
 	// Initialise zoom controls
-	$("#zoomIn").on("click", () => zoomMap(view, 1));
-	$("#zoomOut").on("click", () => zoomMap(view, -1));
+	$("#zoomIn").on("click", () => {
+		map.zoomTo(map.getZoom() + 1, { duration: 150 });
+	});
+	$("#zoomOut").on("click", () => {
+		map.zoomTo(map.getZoom() - 1, { duration: 150 });
+	});
 
 	// Initialise panel toggles
 	$("#leaderboardToggle").on("click", toggleLeaderboard);
@@ -14,11 +18,6 @@ export const initControls = (view: MapView): void => {
 	// Initialise resize handler and run it immediately
 	$(window).on("resize", handleResize);
 	handleResize();
-};
-
-// Simple zoom function with animation
-const zoomMap = (view: MapView, delta: number): void => {
-	view.goTo({ zoom: view.zoom + delta }, { duration: 150 });
 };
 
 // Simple chart toggle

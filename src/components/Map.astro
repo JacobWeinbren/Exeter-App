@@ -1,95 +1,121 @@
 ---
-// Import required components and JSON data
 import Controls from "./Controls.astro";
 import Chart from "./Chart.astro";
 import PopupBox from "./PopupBox.astro";
-import styleJson from "@/data/style.json";
-import rootJson from "@/data/labels.json";
+import * as turf from "@turf/turf";
+import proj4 from "proj4";
+import exeterGeojson from "@/data/Exeter.geojson?raw";
+import clippedGeojson from "@/data/clipped.geojson?raw";
 
-// Remove label layers from the style configuration
-const filteredLayers = styleJson.layers.filter(
-	(layer) => !layer.id.includes("label")
+// Define coordinate systems
+proj4.defs(
+	"EPSG:27700",
+	"+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +towgs84=446.448,-125.157,542.06,0.15,0.247,0.842,-20.489 +units=m +no_defs"
+);
+proj4.defs("EPSG:4326", "+proj=longlat +datum=WGS84 +no_defs");
+proj4.defs(
+	"EPSG:3857",
+	"+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs"
 );
 
-// Customise text colours and styling for map labels
-const processedLayers = rootJson.layers.map((layer) => {
-	if (
-		layer.paint &&
-		(layer.paint["text-color"] || layer.paint["text-halo-color"])
-	) {
-		return {
-			...layer,
-			paint: {
-				...layer.paint,
-				"text-color": "#065c0e",
-				"text-halo-color": "#e5e5e5",
-				"text-halo-width": 1,
-			},
-		};
-	}
-	return layer;
-});
+// Pre-process the GeoJSON data at build time
+const rawPolygonData = JSON.parse(exeterGeojson);
+
+const processedPolygonData: GeoJSON.FeatureCollection = {
+	...rawPolygonData,
+	features: rawPolygonData.features.map((feature: GeoJSON.Feature) => ({
+		...feature,
+		geometry: {
+			...feature.geometry,
+			coordinates: (feature.geometry as any).coordinates.map(
+				(polygon: number[][][]) =>
+					polygon.map((ring: any) =>
+						ring.map((coord: any) => {
+							try {
+								const [lon, lat] = proj4(
+									"EPSG:3857",
+									"EPSG:4326",
+									coord
+								);
+								return [
+									Number.parseFloat(lon.toFixed(6)),
+									Number.parseFloat(lat.toFixed(6)),
+								];
+							} catch (error) {
+								console.error(
+									"Error transforming coordinate:",
+									coord,
+									error
+								);
+								return [0, 0];
+							}
+						})
+					)
+			),
+		},
+	})),
+};
+
+// Convert processed data to a MultiPolygon format
+const exeterMultiPolygon = {
+	type: "MultiPolygon",
+	coordinates: processedPolygonData.features
+		.map(
+			(feature) =>
+				(feature.geometry as GeoJSON.Polygon | GeoJSON.MultiPolygon)
+					.coordinates
+		)
+		.flat(),
+};
+
+// Create mask at build time
+const mask = turf.mask(
+	processedPolygonData as GeoJSON.FeatureCollection<
+		GeoJSON.Polygon | GeoJSON.MultiPolygon
+	>
+);
 ---
 
-<!-- Primary map container with moveable class -->
 <div
 	id="map"
 	class="absolute top-0 bottom-0 left-0 right-0 w-full h-full transition-all moveable"
 >
 </div>
-
-<!-- Hidden element to store JSON configuration data -->
 <div
 	id="mapData"
-	data-filtered-layers={JSON.stringify(filteredLayers)}
-	data-processed-layers={JSON.stringify(processedLayers)}
+	data-processed={JSON.stringify({
+		mask,
+		clippedGeojson,
+		exeterMultiPolygon,
+	})}
 	class="hidden"
 >
 </div>
 
-<!-- UI Component imports -->
 <Controls />
 <Chart />
 <PopupBox />
 
 <script>
-	// Import required modules and utilities
 	import { initConfig } from "@/config/config";
-	import { createMap, createMapView } from "@/map/core/map";
+	import { createMap } from "@/map/core/map";
 	import { initControls } from "@/utils/controls";
 	import $ from "jquery";
 
-	// Flag to prevent multiple initialisations
-	let mapInitialised = false;
-
 	async function initMap() {
-		if (mapInitialised) return;
-
 		try {
-			// Initialise configuration and retrieve authentication token
 			const token = await initConfig();
+			const map = await createMap(token);
 
-			// Set up map instance and view
-			const { map } = await createMap(token);
-			const view = await createMapView(map);
-
-			// Handle view initialisation and UI setup
-			view.when(
-				() => {
-					initControls(view);
-					$("#loading").fadeOut();
-					$("#mapContainer").fadeTo(150, 1);
-					mapInitialised = true;
-				},
-				(error: Error) => {
-					console.error("Error initialising view:", error);
-				}
-			);
+			map.on("load", () => {
+				initControls(map);
+				$("#loading").hide();
+				$("#mapContainer").show();
+			});
 		} catch (error) {
 			console.error("Error in map initialisation:", error);
 		}
 	}
 
-	// Begin map initialisation process
 	initMap();
 </script>
