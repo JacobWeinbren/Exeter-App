@@ -20,7 +20,7 @@ function calculateAllSubcategoryCounts(): Record<string, number> {
 	);
 }
 
-const legendItems = [
+export const legendItems = [
 	{
 		id: "intervention",
 		label: "Intervention",
@@ -53,8 +53,8 @@ const legendItems = [
 		],
 	},
 	{
-		id: "species",
-		label: "Species",
+		id: "observation",
+		label: "Observation",
 		subpoints: [
 			{
 				text: "Plant",
@@ -161,10 +161,18 @@ function renderLegend(subcategoryCounts: Record<string, number>) {
 	});
 
 	$(".category-btn").on("click", function () {
-		const category = $(this).data("category");
+		const selectedCategory = $(this).data("category");
+
+		// Update UI
 		$(".category-btn").removeClass("ring-2 ring-offset-2");
 		$(this).addClass("ring-2 ring-offset-2");
 		$(".category-points").hide();
-		$(`.category-points[data-category="${category}"]`).show();
+		$(`.category-points[data-category="${selectedCategory}"]`).show();
+
+		// Emit event for category change
+		$(document).trigger("category-changed", { category: selectedCategory });
 	});
+
+	// Trigger initial category selection
+	$(document).trigger("category-changed", { category: "intervention" });
 }

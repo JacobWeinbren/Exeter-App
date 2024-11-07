@@ -7,6 +7,7 @@ import maplibregl from "maplibre-gl";
 import { initLeaderboard } from "@/features/leaderboard/leaderboard";
 import { initLegend } from "@/features/legend/legend";
 import $ from "jquery";
+import { legendItems } from "@/features/legend/legend";
 
 export const BIODIVERSITY_DATA_LOADED_EVENT = "biodiversityDataLoaded";
 
@@ -232,6 +233,67 @@ const setupMapLayers = async (
 
 		// Setup 3D building effects
 		setupBuildingEffects(map);
+
+		// Track current category and visibility state
+		let currentCategory = "intervention";
+
+		// Initialise visibility state with all subcategories set to true
+		const visibilityState: Record<string, boolean> = {};
+		legendItems.forEach((item) => {
+			item.subpoints.forEach((subpoint) => {
+				visibilityState[subpoint.text] = true;
+			});
+		});
+
+		// Listen for category changes
+		$(document).on("category-changed", (event, data) => {
+			currentCategory = data.category;
+			applyFilters();
+		});
+
+		// Listen for checkbox changes
+		$(document).on("subpoint-visibility-changed", (event, data) => {
+			const { text, visible } = data;
+			visibilityState[text] = visible;
+			applyFilters();
+		});
+
+		// Function to apply both category and checkbox filters
+		const applyFilters = () => {
+			const categorySubpoints =
+				legendItems
+					.find((item) => item.id === currentCategory)
+					?.subpoints.map((sp) => sp.text) || [];
+
+			map.setFilter("biodiversity-points", [
+				"all",
+				[
+					"==",
+					["get", "Category"],
+					currentCategory.charAt(0).toUpperCase() +
+						currentCategory.slice(1),
+				],
+				[
+					"any",
+					...categorySubpoints.map((text) =>
+						visibilityState[text]
+							? [
+									"==",
+									[
+										"slice",
+										["get", "SubCategory"],
+										0,
+										["length", text],
+									],
+									text,
+								]
+							: ["==", 1, 0]
+					),
+				],
+			] as any);
+		};
+
+		applyFilters();
 	});
 };
 
