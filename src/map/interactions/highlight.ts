@@ -1,18 +1,52 @@
-import maplibregl from "maplibre-gl";
+import type maplibregl from "maplibre-gl";
+import type { MapFeature } from "@/types/map";
 
-export const highlightFeature = (feature: any, map: maplibregl.Map): void => {
-	// Reset any existing highlights
-	clearExistingHighlight(map);
+let lastHighlightedId: string | null = null;
+let currentMap: maplibregl.Map | null = null;
 
-	// Set highlight for the clicked feature
-	map.setPaintProperty("biodiversity", "circle-stroke-opacity", [
-		"case",
-		["==", ["get", "OBJECTID"], feature.properties.OBJECTID],
-		1,
-		0,
-	]);
+export const initialiseHighlight = (map: maplibregl.Map): void => {
+	currentMap = map;
 };
 
-export const clearExistingHighlight = (map: maplibregl.Map): void => {
-	map.setPaintProperty("biodiversity", "circle-stroke-opacity", 0);
+export const highlightFeature = (feature: MapFeature): void => {
+	if (!currentMap) return;
+
+	clearExistingHighlight();
+
+	const featureId = feature.properties.OBJECTID;
+	lastHighlightedId = featureId;
+
+	currentMap.setFilter("biodiversity-points-highlight", [
+		"==",
+		["get", "OBJECTID"],
+		featureId,
+	]);
+
+	currentMap.setPaintProperty(
+		"biodiversity-points-highlight",
+		"circle-opacity",
+		0.2
+	);
+	currentMap.setPaintProperty(
+		"biodiversity-points-highlight",
+		"circle-stroke-opacity",
+		1
+	);
+};
+
+export const clearExistingHighlight = (): void => {
+	if (!currentMap) return;
+
+	currentMap.setPaintProperty(
+		"biodiversity-points-highlight",
+		"circle-opacity",
+		0
+	);
+	currentMap.setPaintProperty(
+		"biodiversity-points-highlight",
+		"circle-stroke-opacity",
+		0
+	);
+
+	lastHighlightedId = null;
 };

@@ -1,8 +1,10 @@
+import type maplibregl from "maplibre-gl";
+
 export interface CustomWindow extends Window {
 	token: string;
 	map: maplibregl.Map | null;
-	biodiversityData: GeoJSON.FeatureCollection | null;
-	clickHighlight: __esri.Handle | null;
+	biodiversityData: GeoJSON.FeatureCollection<any, any> | null;
+	MAP_URL: string;
 }
 
 export interface BiodiversityPoint {

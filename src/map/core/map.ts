@@ -1,116 +1,143 @@
 import type { CustomWindow } from "@/types";
+import type { MapConfig } from "@/config/config";
+import { EMOJI_MAP, MAP_CONSTANTS } from "@/constants/map";
+import { initialiseApi, fetchBiodiversityData } from "@/services/api";
+import { setupInteractions } from "@/map/interactions/interactions";
 import maplibregl from "maplibre-gl";
 import { initLeaderboard } from "@/features/leaderboard/leaderboard";
+import { initLegend } from "@/features/legend/legend";
+import $ from "jquery";
 
-export const createMap = async (token: string): Promise<maplibregl.Map> => {
-	const mapData = JSON.parse(
-		document.getElementById("mapData")?.dataset.processed || "{}"
-	);
-	const { mask, clippedGeojson, exeterMultiPolygon } = mapData;
+export const BIODIVERSITY_DATA_LOADED_EVENT = "biodiversityDataLoaded";
 
+interface MapData {
+	mask: GeoJSON.FeatureCollection;
+	clippedGeojson: string;
+	exeterMultiPolygon: GeoJSON.MultiPolygon;
+}
+
+export const createMap = async (config: MapConfig): Promise<maplibregl.Map> => {
+	const mapData = getMapData();
+	const map = initialiseMap(config.token);
+
+	// Store instances in window object
+	(window as unknown as CustomWindow).map = map;
+	(window as unknown as CustomWindow).token = config.token;
+
+	await setupMapLayers(map, mapData);
+
+	return map;
+};
+
+const getMapData = (): MapData => {
+	const mapDataElement = document.getElementById("mapData");
+	if (!mapDataElement?.dataset.processed) {
+		throw new Error("Map data not found");
+	}
+	return JSON.parse(mapDataElement.dataset.processed);
+};
+
+const initialiseMap = (token: string): maplibregl.Map => {
 	const basemapEnum = "9f7e19f3e4804409918d9513570a011b";
 
-	const map = new maplibregl.Map({
+	return new maplibregl.Map({
 		container: "map",
 		style: `https://basemaps-api.arcgis.com/arcgis/rest/services/styles/${basemapEnum}?type=style&token=${token}`,
-		zoom: 15,
-		minZoom: 14,
-		center: [-3.533, 50.736],
+		zoom: MAP_CONSTANTS.DEFAULT_ZOOM,
+		minZoom: MAP_CONSTANTS.MIN_ZOOM,
+		center: MAP_CONSTANTS.DEFAULT_CENTER,
 		pitch: 0,
 		antialias: true,
 	});
+};
 
-	// Store map in window object
-	(window as unknown as CustomWindow).map = map;
-	(window as unknown as CustomWindow).token = token;
+const addMapLayers = (map: maplibregl.Map, mapData: MapData) => {
+	// Get the first symbol layer ID from the basemap
+	const firstSymbolId = map
+		.getStyle()
+		.layers.find((layer) => layer.type === "symbol")?.id;
 
-	map.on("style.load", async () => {
-		map.getCanvas().style.cursor = "crosshair";
+	map.addLayer({
+		id: "grayscale-overlay",
+		type: "fill",
+		source: "inverse-mask",
+		paint: {
+			"fill-color": "#003C32",
+			"fill-opacity": 0.7,
+		},
+	});
 
-		map.addSource("inverse-mask", {
-			type: "geojson",
-			data: mask,
-		});
-
-		map.addSource("buildings", {
-			type: "geojson",
-			data: JSON.parse(clippedGeojson),
-		});
-
-		// Fetch and store biodiversity data
-		const biodiversityUrl = `https://services5.arcgis.com/N6Nhpnxaedla81he/arcgis/rest/services/Biodiversity_Point_new/FeatureServer/0/query?f=geojson&where=1=1&outFields=*&token=${token}`;
-		const response = await fetch(biodiversityUrl);
-		const biodiversityData = await response.json();
-		(window as unknown as CustomWindow).biodiversityData = biodiversityData;
-
-		initLeaderboard();
-
-		map.addSource("biodiversity-points", {
-			type: "geojson",
-			data: biodiversityData,
-		});
-
-		// Add OSM vector source for labels
-		map.addSource("osm", {
-			type: "vector",
-			url: "https://tiles.stadiamaps.com/data/openmaptiles.json",
-		});
-
-		// Get the first symbol layer ID from the basemap
-		const firstSymbolId = map
-			.getStyle()
-			.layers.find((layer) => layer.type === "symbol")?.id;
-
-		map.addLayer({
-			id: "grayscale-overlay",
-			type: "fill",
-			source: "inverse-mask",
+	map.addLayer(
+		{
+			id: "3d-buildings",
+			source: "buildings",
+			type: "fill-extrusion",
 			paint: {
-				"fill-color": "#003C32",
-				"fill-opacity": 0.7,
-			},
-		});
-
-		map.addLayer(
-			{
-				id: "3d-buildings",
-				source: "buildings",
-				type: "fill-extrusion",
-				paint: {
-					"fill-extrusion-color": "#E6E6E6",
-					"fill-extrusion-height": [
-						"case",
-						[
-							"all",
-							["has", "height"],
-							["!=", ["get", "height"], null as any],
-						],
-						["*", ["get", "height"], 3.28084],
-						20,
+				"fill-extrusion-color": "#e5e5e5",
+				"fill-extrusion-height": [
+					"case",
+					[
+						"all",
+						["has", "height"],
+						["!=", ["get", "height"], null as any],
 					],
-					"fill-extrusion-base": 0,
-					"fill-extrusion-opacity": 0,
-				},
+					["*", ["get", "height"], 3.28084],
+					20,
+				],
+				"fill-extrusion-base": 0,
+				"fill-extrusion-opacity": 0,
 			},
-			firstSymbolId
-		);
+		},
+		firstSymbolId
+	);
 
-		map.addLayer({
-			id: "biodiversity",
-			type: "circle",
-			source: "biodiversity-points",
-			paint: {
-				"circle-radius": 5,
-				"circle-color": "#4CAF50",
-				"circle-opacity": 1,
-				"circle-stroke-width": 2,
-				"circle-stroke-color": "#fff",
-				"circle-stroke-opacity": 0,
-			},
-		});
+	// Add highlight layer before the main points layer
+	map.addLayer({
+		id: "biodiversity-points-highlight",
+		type: "circle",
+		source: "biodiversity-points",
+		paint: {
+			"circle-radius": 15,
+			"circle-color": "#007cbf",
+			"circle-opacity": 0,
+			"circle-stroke-width": 2,
+			"circle-stroke-color": "#007cbf",
+			"circle-stroke-opacity": 0,
+		},
+	});
 
-		// Add label layers after buildings
-		map.addLayer({
+	map.addLayer({
+		id: "biodiversity-points",
+		type: "symbol",
+		source: "biodiversity-points",
+		layout: {
+			"icon-image": [
+				"match",
+				[
+					"slice",
+					["to-string", ["get", "SubCategory"]],
+					0,
+					["-", ["length", ["to-string", ["get", "SubCategory"]]], 2],
+				],
+				...Object.entries(EMOJI_MAP).flatMap(([key, value]) => [
+					key,
+					value,
+				]),
+				EMOJI_MAP["Other Species"],
+			] as any,
+			"icon-size": 0.5,
+			"icon-allow-overlap": true,
+			"icon-anchor": "center",
+			"icon-offset": [0, 0],
+		},
+		paint: {
+			"icon-opacity": 1,
+			"icon-color": "#000000",
+		},
+	});
+
+	map.addLayer(
+		{
 			id: "place-labels",
 			type: "symbol",
 			source: "osm",
@@ -135,28 +162,119 @@ export const createMap = async (token: string): Promise<maplibregl.Map> => {
 			},
 			paint: {
 				"text-color": "#333",
-				"text-opacity": ["case", ["within", exeterMultiPolygon], 1, 0],
+				"text-opacity": [
+					"case",
+					["within", mapData.exeterMultiPolygon],
+					1,
+					0,
+				],
 				"text-halo-color": "#fff",
 				"text-halo-width": 2,
 			},
-		});
+		},
+		firstSymbolId
+	);
+};
 
-		function testPitch() {
-			const currentPitch = map.getPitch();
-			const opacity = Math.min(0.7, 0.0 + (currentPitch / 45) * 0.7);
-			map.setPaintProperty(
-				"3d-buildings",
-				"fill-extrusion-opacity",
-				opacity
-			);
-		}
-
-		testPitch();
-
-		map.on("pitch", () => {
-			testPitch();
-		});
+const addBaseSources = (map: maplibregl.Map, mapData: MapData): void => {
+	map.addSource("inverse-mask", {
+		type: "geojson",
+		data: mapData.mask,
 	});
 
-	return map;
+	map.addSource("buildings", {
+		type: "geojson",
+		data: JSON.parse(mapData.clippedGeojson),
+	});
+
+	map.addSource("osm", {
+		type: "vector",
+		url: "https://tiles.stadiamaps.com/data/openmaptiles.json",
+	});
+};
+
+const setupMapLayers = async (
+	map: maplibregl.Map,
+	mapData: MapData
+): Promise<void> => {
+	map.on("style.load", async () => {
+		map.getCanvas().style.cursor = "crosshair";
+
+		// Add base sources
+		addBaseSources(map, mapData);
+
+		// Initialise API
+		initialiseApi((window as unknown as CustomWindow).token);
+
+		// Fetch biodiversity data directly
+		const biodiversityData = await fetchBiodiversityData();
+		(window as unknown as CustomWindow).biodiversityData = biodiversityData;
+		$(document).trigger(BIODIVERSITY_DATA_LOADED_EVENT, {
+			biodiversityData,
+		});
+
+		// Add biodiversity source
+		map.addSource("biodiversity-points", {
+			type: "geojson",
+			data: biodiversityData,
+		});
+
+		// Setup emoji symbols
+		setupEmojiSymbols(map);
+
+		// Add map layers
+		addMapLayers(map, mapData);
+
+		// Initialise features
+		setupInteractions(map);
+		initLeaderboard();
+		initLegend();
+
+		// Setup 3D building effects
+		setupBuildingEffects(map);
+	});
+};
+
+const setupEmojiSymbols = (map: maplibregl.Map): void => {
+	const createEmojiImage = (emoji: string): HTMLCanvasElement => {
+		const size = 64;
+		const canvas = document.createElement("canvas");
+		const ctx = canvas.getContext("2d")!;
+		canvas.width = size;
+		canvas.height = size;
+		ctx.clearRect(0, 0, size, size);
+		ctx.textAlign = "center";
+		ctx.textBaseline = "middle";
+		ctx.font = `${size * 0.75}px Arial`;
+		ctx.fillText(emoji, size / 2, size / 2);
+		return canvas;
+	};
+
+	// Use Object.values to get unique emojis from EMOJI_MAP
+	const uniqueEmojis = [...new Set(Object.values(EMOJI_MAP))];
+
+	uniqueEmojis.forEach((emoji) => {
+		try {
+			const canvas = createEmojiImage(emoji);
+			map.addImage(
+				emoji,
+				canvas
+					.getContext("2d")!
+					.getImageData(0, 0, canvas.width, canvas.height)
+			);
+		} catch (e) {
+			console.error(`Failed to load emoji: ${emoji}`, e);
+		}
+	});
+};
+
+const setupBuildingEffects = (map: maplibregl.Map): void => {
+	const updateBuildingOpacity = () => {
+		const currentPitch = map.getPitch();
+		const opacity = Math.min(0.7, 0.0 + (currentPitch / 45) * 0.7);
+		map.setPaintProperty("3d-buildings", "fill-extrusion-opacity", opacity);
+	};
+
+	updateBuildingOpacity();
+	map.on("pitch", updateBuildingOpacity);
 };

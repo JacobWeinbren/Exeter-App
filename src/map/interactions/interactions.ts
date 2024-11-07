@@ -1,69 +1,88 @@
+import type maplibregl from "maplibre-gl";
+import type { MapFeature } from "@/types/map";
 import { showPopup, hidePopup } from "@/features/popup/popup";
-import { highlightFeature, clearExistingHighlight } from "./highlight";
-import maplibregl from "maplibre-gl";
+import { fetchAttachments, getAttachmentUrl } from "@/services/api";
+import {
+	initialiseHighlight,
+	highlightFeature,
+	clearExistingHighlight,
+} from "./highlight";
 
-type InteractionMode = "hover" | "click";
-let currentMode: InteractionMode = "hover";
 let selectedPointId: string | null = null;
+const layerId = 'biodiversity-points'
 
 export const setupInteractions = (map: maplibregl.Map): void => {
-	map.on("click", "biodiversity", (e) => handleClick(e, map));
+	initialiseHighlight(map);
+
+	map.on("click", layerId, (e) => {
+		const typedEvent = e as maplibregl.MapMouseEvent & {
+			features?: MapFeature[];
+		};
+		handleFeatureClick(typedEvent, map);
+	});
 	map.on("click", (e) => handleMapClick(e, map));
 };
 
-const handleClick = (event: any, map: maplibregl.Map): void => {
-	const feature = event.features[0];
+const handleFeatureClick = (
+	event: maplibregl.MapMouseEvent & { features?: MapFeature[] },
+	map: maplibregl.Map
+): void => {
+	const feature = event.features?.[0];
+	if (!feature) return;
 
-	if (feature) {
-		currentMode = "click";
-		selectedPointId = feature.properties.OBJECTID;
-		showPopupForFeature(feature);
-		highlightFeature(feature, map);
-	} else {
-		currentMode = "hover";
-		selectedPointId = null;
-		hidePopup();
-		clearExistingHighlight(map);
-	}
+	selectedPointId = feature.properties.OBJECTID;
+	showFeatureDetails(feature, map);
 };
 
-const handleMapClick = (event: any, map: maplibregl.Map): void => {
+const handleMapClick = (
+	event: maplibregl.MapMouseEvent,
+	map: maplibregl.Map
+): void => {
 	const features = map.queryRenderedFeatures(event.point, {
-		layers: ["biodiversity"],
+		layers: [layerId],
 	});
 
 	if (features.length === 0) {
-		currentMode = "hover";
 		selectedPointId = null;
 		hidePopup();
-		clearExistingHighlight(map);
+		clearExistingHighlight();
 	}
 };
 
-const showPopupForFeature = async (feature: any): Promise<void> => {
-	const count = feature.properties.cluster_count || 1;
-	const objectId = feature.properties.OBJECTID;
-	const title = `Biodiversity Point ${objectId}`;
-	const content = `Number of observations: ${count}`;
+const showFeatureDetails = async (
+	feature: MapFeature,
+	map: maplibregl.Map
+): Promise<void> => {
+	const {
+		OBJECTID: objectId,
+		Name: name = "Unknown",
+		Category: category = "Unknown",
+		SubCategory: subCategory = "Unknown",
+		Details: details = "No details available",
+		cluster_count = 1,
+	} = feature.properties;
 
-	// Fetch attachments for this feature
-	const token = (window as any).token;
-	const attachmentsUrl = `https://services5.arcgis.com/N6Nhpnxaedla81he/arcgis/rest/services/Biodiversity_Point_new/FeatureServer/0/${objectId}/attachments?f=json&token=${token}`;
+	const contentHtml = `
+		<div class="popup-content">
+			<p><strong>Name:</strong> <span>${name}</span></p>
+			<p><strong>Category:</strong> <span>${category}</span></p>
+			<p><strong>SubCategory:</strong> <span>${subCategory}</span></p>
+			<p><strong>Details:</strong> <span>${details}</span></p>
+			<p><strong>Number of observations:</strong> <span>${cluster_count}</span></p>
+		</div>
+	`;
 
 	try {
-		const response = await fetch(attachmentsUrl);
-		const data = await response.json();
-		const attachments = data.attachmentInfos || [];
+		const attachments = await fetchAttachments(objectId);
+		const imageUrl =
+			attachments.length > 0
+				? getAttachmentUrl(objectId, attachments[0].id)
+				: undefined;
 
-		if (attachments.length > 0) {
-			const attachment = attachments[0];
-			const imageUrl = `https://services5.arcgis.com/N6Nhpnxaedla81he/arcgis/rest/services/Biodiversity_Point_new/FeatureServer/0/${objectId}/attachments/${attachment.id}?token=${token}`;
-			showPopup(title, content, imageUrl);
-		} else {
-			showPopup(title, content);
-		}
+		highlightFeature(feature);
+		showPopup(`Biodiversity Point ${objectId}`, contentHtml, imageUrl);
 	} catch (error) {
 		console.error("Error fetching attachments:", error);
-		showPopup(title, content);
+		showPopup(`Biodiversity Point ${objectId}`, contentHtml);
 	}
 };

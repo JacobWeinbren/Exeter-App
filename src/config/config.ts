@@ -1,48 +1,56 @@
 import esriConfig from "@arcgis/core/config";
-import OauthInfo from "@arcgis/core/identity/OAuthInfo";
+import OAuthInfo from "@arcgis/core/identity/OAuthInfo";
 import IdentityManager from "@arcgis/core/identity/IdentityManager";
 import Portal from "@arcgis/core/portal/Portal";
-import { type CustomWindow } from "@/types";
+import type { CustomWindow } from "@/types";
 
+// Constants
+const PORTAL_URL = "https://uoe.maps.arcgis.com";
+const ASSETS_PATH = "https://js.arcgis.com/4.30/@arcgis/core/assets";
 const MAP_URL =
-	"https://services5.arcgis.com/N6Nhpnxaedla81he/arcgis/rest/services/Biodiversity_Point_new/FeatureServer";
+	"https://services5.arcgis.com/N6Nhpnxaedla81he/arcgis/rest/services/Biodiversity_Points_Revised/FeatureServer";
 
-export const initConfig = async () => {
-	setupEsriConfig();
-	setupMapUrl();
-	const info = createOAuthInfo();
-	IdentityManager.registerOAuthInfos([info]);
-	return await authenticate();
-};
-
-function setupEsriConfig() {
-	esriConfig.portalUrl = "https://uoe.maps.arcgis.com";
-	esriConfig.assetsPath = "https://js.arcgis.com/4.30/@arcgis/core/assets";
+// Types
+export interface MapConfig {
+	token: string;
+	portalUrl: string;
+	mapUrl: string;
 }
 
-function setupMapUrl() {
-	(window as unknown as CustomWindow).MAP_URL = MAP_URL;
-}
+// Initialise configuration
+export const initConfig = async (): Promise<MapConfig> => {
+	// Setup basic configurations
+	esriConfig.portalUrl = PORTAL_URL;
+	esriConfig.assetsPath = ASSETS_PATH;
 
-function createOAuthInfo() {
-	return new OauthInfo({
+	// Setup OAuth
+	const oauthInfo = new OAuthInfo({
 		appId: import.meta.env.PUBLIC_ARCGIS_APP_ID,
 		popup: false,
-		portalUrl: esriConfig.portalUrl,
+		portalUrl: PORTAL_URL,
 		authNamespace: "/",
 		flowType: "auto",
 	});
-}
 
-async function authenticate() {
+	IdentityManager.registerOAuthInfos([oauthInfo]);
+
 	try {
+		// Authenticate and get credentials
 		const credential = await IdentityManager.getCredential(
-			`${esriConfig.portalUrl}/sharing`
+			`${PORTAL_URL}/sharing`
 		);
 		await new Portal().load();
-		return credential.token;
+
+		// Store MAP_URL in window object
+		(window as unknown as CustomWindow).MAP_URL = MAP_URL;
+
+		return {
+			token: credential.token,
+			portalUrl: PORTAL_URL,
+			mapUrl: MAP_URL,
+		};
 	} catch (error) {
-		console.error(error);
+		console.error("Authentication failed:", error);
 		throw error;
 	}
-}
+};

@@ -13,13 +13,13 @@ export const initLeaderboard = async (): Promise<void> => {
 	// Calculate contributions from the last 7 days
 	const sevenDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
 	const recentFeatures = geojsonData.features.filter(
-		(feature) => feature.properties?.CreationTime >= sevenDaysAgo
+		(feature) => feature.properties?.DateTime >= sevenDaysAgo
 	);
 
 	const contributors = Object.entries(
 		recentFeatures.reduce(
 			(acc, feature) => {
-				const name = feature.properties?.CreatorID;
+				const name = feature.properties?.Creator;
 				if (name) acc[name] = (acc[name] || 0) + 1;
 				return acc;
 			},

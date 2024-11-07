@@ -5,21 +5,39 @@ export const showPopup = (
 	content: string,
 	imageUrl?: string
 ): void => {
-	$("#popupTitle").text(title);
-	$("#popupContent").text(content);
+	const $popup = $("#popupBox");
+	const $title = $("#popupTitle");
+	const $content = $("#popupContent");
+	const $image = $("#popupImage");
 
-	// Handle image display
-	const $popupImage = $("#popupImage");
+	// Set content
+	$title.html(title);
+	$content.html(content);
+
+	// Handle image
 	if (imageUrl) {
-		$popupImage.attr("src", imageUrl).show();
+		$image
+			.attr("src", imageUrl)
+			.removeClass("hidden")
+			.on("error", function () {
+				$(this).addClass("hidden");
+			});
 	} else {
-		$popupImage.hide();
+		$image.addClass("hidden");
 	}
 
-	$("#popupBox").removeClass("translate-y-full").css("bottom", "1.5rem");
+	// Show popup with slide up and fade in
+	$popup
+		.removeClass("invisible")
+		.removeClass("translate-y-8 opacity-0")
+		.addClass("translate-y-0 opacity-100");
 };
 
 export const hidePopup = (): void => {
-	$("#popupBox").addClass("translate-y-full").css("bottom", "-1.5rem");
-	$("#popupImage").attr("src", "").hide();
+	const $popup = $("#popupBox");
+
+	// Hide popup with slide down and fade out
+	$popup
+		.removeClass("translate-y-0 opacity-100")
+		.addClass("translate-y-8 opacity-0");
 };
