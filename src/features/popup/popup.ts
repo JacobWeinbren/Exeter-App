@@ -1,17 +1,11 @@
 import $ from "jquery";
 
-export const showPopup = (
-	title: string,
-	content: string,
-	imageUrl?: string
-): void => {
+export const showPopup = (content: string, imageUrl?: string): void => {
 	const $popup = $("#popupBox");
-	const $title = $("#popupTitle");
 	const $content = $("#popupContent");
 	const $image = $("#popupImage");
 
 	// Set content
-	$title.html(title);
 	$content.html(content);
 
 	// Handle image

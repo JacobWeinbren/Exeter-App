@@ -17,9 +17,8 @@ export const fetchAttachments = async (
 	if (!authToken || !MAP_URL) throw new Error("API not initialized");
 
 	try {
-		const response = await fetch(
-			`${MAP_URL}/0/attachments/${objectId}?f=json&token=${authToken}`
-		);
+		const url = `${MAP_URL}/0/${objectId}/attachments?f=json&token=${authToken}`;
+		const response = await fetch(url);
 		const data = await response.json();
 		return data.attachmentInfos || [];
 	} catch (error) {
@@ -33,7 +32,8 @@ export const getAttachmentUrl = (
 	attachmentId: string
 ): string => {
 	if (!authToken || !MAP_URL) throw new Error("API not initialized");
-	return `${MAP_URL}/0/attachments/${objectId}/${attachmentId}?token=${authToken}`;
+
+	return `${MAP_URL}/0/${objectId}/attachments/${attachmentId}?token=${authToken}`;
 };
 
 export const fetchBiodiversityData = async (): Promise<

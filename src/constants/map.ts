@@ -1,6 +1,6 @@
 export const MAP_CONSTANTS = {
-	DEFAULT_CENTER: [-3.5339, 50.7184] as [number, number],
-	DEFAULT_ZOOM: 13,
+	DEFAULT_CENTER: [-3.5334, 50.7365] as [number, number],
+	DEFAULT_ZOOM: 15,
 	MIN_ZOOM: 11,
 };
 

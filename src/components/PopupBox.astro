@@ -5,13 +5,12 @@
 {/* Popup box container with initial hidden state */}
 <div
 	id="popupBox"
-	class="absolute p-4 transition-all ease-in-out transform translate-y-8 opacity-0 invisible bottom-4 right-4 bg-white rounded-lg shadow-lg border border-gray-200 min-w-[200px]"
+	class="absolute p-4 transition-all ease-in-out transform translate-y-8 opacity-0 invisible bottom-4 right-4 bg-white rounded-lg shadow-lg border border-gray-200 max-w-[400px]"
 >
-	<h3 id="popupTitle" class="mb-2 font-semibold text-gray-800"></h3>
-	<div id="popupContent" class="text-sm text-gray-600"></div>
+	<div id="popupContent"></div>
 	<img
 		id="popupImage"
-		class="w-full max-w-[300px] max-h-[300px] rounded-lg hidden mt-2"
+		class="w-full h-auto rounded-lg max-w-72 max-h-72 hidden mt-3 object-cover"
 		alt="Feature image"
 	/>
 </div>
