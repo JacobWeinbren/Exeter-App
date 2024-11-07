@@ -265,32 +265,32 @@ const setupMapLayers = async (
 					.find((item) => item.id === currentCategory)
 					?.subpoints.map((sp) => sp.text) || [];
 
-			map.setFilter("biodiversity-points", [
+			// Create the filter expression
+			const filter = [
 				"all",
 				[
 					"==",
-					["get", "Category"],
-					currentCategory.charAt(0).toUpperCase() +
-						currentCategory.slice(1),
+					["downcase", ["get", "Category"]],
+					currentCategory.toLowerCase(),
 				],
 				[
-					"any",
-					...categorySubpoints.map((text) =>
-						visibilityState[text]
-							? [
-									"==",
-									[
-										"slice",
-										["get", "SubCategory"],
-										0,
-										["length", text],
-									],
-									text,
-								]
-							: ["==", 1, 0]
-					),
+					"match",
+					["get", "SubCategory"],
+					categorySubpoints
+						.filter((text) => visibilityState[text])
+						.map((text) => {
+							const emoji =
+								text in EMOJI_MAP
+									? EMOJI_MAP[text as keyof typeof EMOJI_MAP]
+									: EMOJI_MAP["Other Species"];
+							return `${text} ${emoji}`;
+						}),
+					true,
+					false,
 				],
-			] as any);
+			] as any;
+
+			map.setFilter("biodiversity-points", filter);
 		};
 
 		applyFilters();
