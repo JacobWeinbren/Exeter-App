@@ -25,6 +25,10 @@ export const showPopup = (content: string, imageUrl?: string): void => {
 		.removeClass("invisible")
 		.removeClass("translate-y-8 opacity-0")
 		.addClass("translate-y-0 opacity-100");
+
+	// Set focus to popup when shown
+	$popup.attr('aria-hidden', 'false')
+	      .focus();
 };
 
 export const hidePopup = (): void => {
@@ -34,4 +38,7 @@ export const hidePopup = (): void => {
 	$popup
 		.removeClass("translate-y-0 opacity-100")
 		.addClass("translate-y-8 opacity-0");
+
+	$popup.attr('aria-hidden', 'true');
+	// Return focus to trigger element if tracked
 };

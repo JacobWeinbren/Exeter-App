@@ -3,16 +3,24 @@
 ---
 
 {/* Main leaderboard container */}
-<div id="leaderboard">
+<div 
+	id="leaderboard"
+	role="complementary"
+	aria-label="Contributor Leaderboard"
+>
 	<div class="p-4">
 		{/* Leaderboard heading and timeframe */}
-		<h2 class="mb-2 text-xl font-bold text-center text-gray-600">
+		<h2 id="leaderboardTitle" class="mb-2 text-xl font-bold text-center text-gray-600">
 			Contributor Leaderboard
 		</h2>
-		<p class="text-center text-blue-400 font-blue">Last 7 days</p>
+		<p class="text-center text-blue-400 font-blue" aria-live="polite">Last 7 days</p>
 	</div>
 	{/* Divider line */}
-	<div class="h-px bg-gray-200"></div>
+	<div class="h-px bg-gray-200" role="separator"></div>
 	{/* Container for dynamically populated leaderboard items */}
-	<ol class="p-2" id="leaderboardList"></ol>
+	<ol 
+		class="p-2" 
+		id="leaderboardList"
+		aria-labelledby="leaderboardTitle"
+	></ol>
 </div>

@@ -95,23 +95,33 @@ export function initLegend() {
 
 function renderLegend(subcategoryCounts: Record<string, number>) {
 	const legendHtml = `
-		<h3 class="mb-3 text-sm font-semibold">Wildly Accurate</h3>
-		<div class="flex flex-wrap gap-2 mb-3">
-			${legendItems
-				.map(
-					(item) => `
-				<button data-category="${item.id}" class="px-3 py-1 text-sm bg-white border border-black rounded-full category-btn">
+		<h3 id="legendTitle" class="mb-3 text-sm font-semibold">Wildly Accurate</h3>
+		<div 
+			class="flex flex-wrap gap-2 mb-3"
+			role="tablist"
+			aria-label="Data Categories"
+		>
+			${legendItems.map((item) => `
+				<button 
+					data-category="${item.id}" 
+					role="tab"
+					aria-selected="false"
+					aria-controls="panel-${item.id}"
+					class="px-3 py-1 text-sm bg-white border border-black rounded-full category-btn"
+				>
 					${item.label}
 				</button>
-			`
-				)
-				.join("")}
+			`).join("")}
 		</div>
 		<div class="mb-3 space-y-2">
-			${legendItems
-				.map(
-					(item) => `
-				<div class="text-xs category-points" data-category="${item.id}">
+			${legendItems.map((item) => `
+				<div 
+					class="text-xs category-points" 
+					data-category="${item.id}"
+					role="tabpanel"
+					id="panel-${item.id}"
+					aria-labelledby="tab-${item.id}"
+				>
 					${item.subpoints
 						.map(
 							(subpoint) => `
@@ -130,9 +140,7 @@ function renderLegend(subcategoryCounts: Record<string, number>) {
 						)
 						.join("")}
 				</div>
-			`
-				)
-				.join("")}
+			`).join("")}
 		</div>
 		<div class="pt-2 text-xs text-gray-500 border-t">
 			<div>Data from <a class="underline" href="https://www.exeter.ac.uk/" target="_blank">Exeter University</a>.</div>

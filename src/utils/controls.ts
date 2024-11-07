@@ -18,6 +18,17 @@ export const initControls = (map: maplibregl.Map): void => {
 	// Initialise resize handler and run it immediately
 	$(window).on("resize", handleResize);
 	handleResize();
+
+	// Add keyboard navigation support
+	const handleKeyboardNavigation = (e: KeyboardEvent): void => {
+		if (e.key === 'Escape') {
+			// Close any open panels
+			$("#leaderboardContainer").addClass("-translate-x-full");
+			$("#legend").addClass("-translate-y-[calc(100%+0.5rem)]");
+		}
+	};
+
+	document.addEventListener('keydown', handleKeyboardNavigation);
 };
 
 // Simple chart toggle
