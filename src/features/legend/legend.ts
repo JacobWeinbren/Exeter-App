@@ -2,6 +2,8 @@ import $ from "jquery";
 import type { CustomWindow } from "@/types";
 import { BIODIVERSITY_DATA_LOADED_EVENT } from "@/map/core/map";
 import { EMOJI_MAP } from "@/constants/map";
+import { hidePopup } from "@/features/popup/popup";
+import { clearExistingHighlight } from "@/map/interactions/highlight";
 
 function calculateAllSubcategoryCounts(): Record<string, number> {
 	const biodiversityData = (window as unknown as CustomWindow)
@@ -101,7 +103,9 @@ function renderLegend(subcategoryCounts: Record<string, number>) {
 			role="tablist"
 			aria-label="Data Categories"
 		>
-			${legendItems.map((item) => `
+			${legendItems
+				.map(
+					(item) => `
 				<button 
 					data-category="${item.id}" 
 					role="tab"
@@ -111,10 +115,14 @@ function renderLegend(subcategoryCounts: Record<string, number>) {
 				>
 					${item.label}
 				</button>
-			`).join("")}
+			`
+				)
+				.join("")}
 		</div>
 		<div class="mb-3 space-y-2">
-			${legendItems.map((item) => `
+			${legendItems
+				.map(
+					(item) => `
 				<div 
 					class="text-xs category-points" 
 					data-category="${item.id}"
@@ -140,7 +148,9 @@ function renderLegend(subcategoryCounts: Record<string, number>) {
 						)
 						.join("")}
 				</div>
-			`).join("")}
+			`
+				)
+				.join("")}
 		</div>
 		<div class="pt-2 text-xs text-gray-500 border-t">
 			<div>Data from <a class="underline" href="https://www.exeter.ac.uk/" target="_blank">Exeter University</a>.</div>
@@ -176,6 +186,10 @@ function renderLegend(subcategoryCounts: Record<string, number>) {
 		$(this).addClass("ring-2 ring-offset-2");
 		$(".category-points").hide();
 		$(`.category-points[data-category="${selectedCategory}"]`).show();
+
+		// Clear any selected points when changing categories
+		hidePopup();
+		clearExistingHighlight();
 
 		// Emit event for category change
 		$(document).trigger("category-changed", { category: selectedCategory });
