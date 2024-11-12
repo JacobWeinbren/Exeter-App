@@ -74,7 +74,7 @@ const addMapLayers = (map: maplibregl.Map, mapData: MapData) => {
 			source: "buildings",
 			type: "fill-extrusion",
 			paint: {
-				"fill-extrusion-color": "#e5e5e5",
+				"fill-extrusion-color": "#e7e2c5",
 				"fill-extrusion-height": [
 					"case",
 					[
