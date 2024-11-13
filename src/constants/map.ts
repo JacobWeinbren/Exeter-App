@@ -8,6 +8,7 @@ export const EMOJI_MAP = {
 	"Wildlife Home": "🏠",
 	"Natural Barrier": "🌳",
 	"Wood Feature": "🪵",
+	Insect: "🐛",
 	"Meadows & Grassland": "🌸",
 	"Other Intervention": "🔍",
 	Plant: "🌿",

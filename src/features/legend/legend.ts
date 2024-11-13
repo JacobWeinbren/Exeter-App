@@ -30,27 +30,22 @@ export const legendItems = [
 			{
 				text: "Wildlife Home",
 				emoji: EMOJI_MAP["Wildlife Home"],
-				colour: "#3B82F6",
 			},
 			{
 				text: "Natural Barrier",
 				emoji: EMOJI_MAP["Natural Barrier"],
-				colour: "#F97316",
 			},
 			{
 				text: "Wood Features",
 				emoji: EMOJI_MAP["Wood Feature"],
-				colour: "#84CC16",
 			},
 			{
 				text: "Meadows & Grassland",
 				emoji: EMOJI_MAP["Meadows & Grassland"],
-				colour: "#EAB308",
 			},
 			{
 				text: "Other Intervention",
 				emoji: EMOJI_MAP["Other Intervention"],
-				colour: "#8B5CF6",
 			},
 		],
 	},
@@ -61,27 +56,30 @@ export const legendItems = [
 			{
 				text: "Plant",
 				emoji: EMOJI_MAP["Plant"],
-				colour: "#22C55E",
+
 			},
 			{
 				text: "Bird",
 				emoji: EMOJI_MAP["Bird"],
-				colour: "#FB923C",
+
+			},
+			{
+				text: "Insect",
+				emoji: EMOJI_MAP["Insect"],
+
 			},
 			{
 				text: "Other Animal",
 				emoji: EMOJI_MAP["Other Animal"],
-				colour: "#FB923C",
+
 			},
 			{
 				text: "Animal Trace",
 				emoji: EMOJI_MAP["Animal Traces"],
-				colour: "#8B5CF6",
 			},
 			{
 				text: "Other Species",
 				emoji: EMOJI_MAP["Other Species"],
-				colour: "#EAB308",
 			},
 		],
 	},
