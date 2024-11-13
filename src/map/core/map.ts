@@ -215,7 +215,7 @@ const setupMapLayers = async (
 		});
 
 		// Enable terrain
-		map.setTerrain({ source: "terrain", exaggeration: 1.5 });
+		map.setTerrain({ source: "terrain", exaggeration: 2 });
 
 		// Initialise API
 		initialiseApi((window as unknown as CustomWindow).token);
