@@ -1,7 +1,6 @@
 ---
 import Controls from "./Controls.astro";
 import PopupBox from "./PopupBox.astro";
-import * as turf from "@turf/turf";
 import proj4 from "proj4";
 import exeterGeojson from "@/data/Exeter.geojson?raw";
 import clippedGeojson from "@/data/clipped.geojson?raw";
@@ -66,13 +65,6 @@ const exeterMultiPolygon = {
 		)
 		.flat(),
 };
-
-// Create mask at build time
-const mask = turf.mask(
-	processedPolygonData as GeoJSON.FeatureCollection<
-		GeoJSON.Polygon | GeoJSON.MultiPolygon
-	>
-);
 ---
 
 <div class="sr-only focus:not-sr-only focus:absolute focus:z-50">
@@ -88,7 +80,6 @@ const mask = turf.mask(
 <div
 	id="mapData"
 	data-processed={JSON.stringify({
-		mask,
 		clippedGeojson,
 		exeterMultiPolygon,
 	})}

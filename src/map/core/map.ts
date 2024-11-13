@@ -8,11 +8,12 @@ import { initLeaderboard } from "@/features/leaderboard/leaderboard";
 import { initLegend } from "@/features/legend/legend";
 import $ from "jquery";
 import { legendItems } from "@/features/legend/legend";
+import { hidePopup } from "@/features/popup/popup";
+import { clearExistingHighlight } from "../interactions/highlight";
 
 export const BIODIVERSITY_DATA_LOADED_EVENT = "biodiversityDataLoaded";
 
 interface MapData {
-	mask: GeoJSON.FeatureCollection;
 	clippedGeojson: string;
 	exeterMultiPolygon: GeoJSON.MultiPolygon;
 }
@@ -58,16 +59,6 @@ const addMapLayers = (map: maplibregl.Map, mapData: MapData) => {
 		.getStyle()
 		.layers.find((layer) => layer.type === "symbol")?.id;
 
-	map.addLayer({
-		id: "grayscale-overlay",
-		type: "fill",
-		source: "inverse-mask",
-		paint: {
-			"fill-color": "#003C32",
-			"fill-opacity": 0.7,
-		},
-	});
-
 	map.addLayer(
 		{
 			id: "3d-buildings",
@@ -92,18 +83,31 @@ const addMapLayers = (map: maplibregl.Map, mapData: MapData) => {
 		firstSymbolId
 	);
 
-	// Add highlight layer before the main points layer
 	map.addLayer({
 		id: "biodiversity-points-highlight",
 		type: "circle",
 		source: "biodiversity-points",
 		paint: {
 			"circle-radius": 15,
+			"circle-color": "#ffffff",
+			"circle-opacity": 0.3,
+			"circle-stroke-width": 2,
+			"circle-stroke-color": "#ffffff",
+			"circle-stroke-opacity": 1,
+		},
+	});
+
+	map.addLayer({
+		id: "biodiversity-points-selected",
+		type: "circle",
+		source: "biodiversity-points",
+		paint: {
+			"circle-radius": 15,
 			"circle-color": "#007cbf",
-			"circle-opacity": 0,
+			"circle-opacity": 0.3,
 			"circle-stroke-width": 2,
 			"circle-stroke-color": "#007cbf",
-			"circle-stroke-opacity": 0,
+			"circle-stroke-opacity": 1,
 		},
 	});
 
@@ -178,11 +182,6 @@ const addMapLayers = (map: maplibregl.Map, mapData: MapData) => {
 };
 
 const addBaseSources = (map: maplibregl.Map, mapData: MapData): void => {
-	map.addSource("inverse-mask", {
-		type: "geojson",
-		data: mapData.mask,
-	});
-
 	map.addSource("buildings", {
 		type: "geojson",
 		data: JSON.parse(mapData.clippedGeojson),
@@ -203,6 +202,20 @@ const setupMapLayers = async (
 
 		// Add base sources
 		addBaseSources(map, mapData);
+
+		// Add terrain source and settings
+		map.addSource("terrain", {
+			type: "raster-dem",
+			tiles: [
+				"https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png",
+			],
+			tileSize: 256,
+			maxzoom: 15,
+			encoding: "terrarium",
+		});
+
+		// Enable terrain
+		map.setTerrain({ source: "terrain", exaggeration: 1.5 });
 
 		// Initialise API
 		initialiseApi((window as unknown as CustomWindow).token);
@@ -253,6 +266,9 @@ const setupMapLayers = async (
 
 		// Listen for checkbox changes
 		$(document).on("subpoint-visibility-changed", (event, data) => {
+			hidePopup();
+			clearExistingHighlight();
+
 			const { text, visible } = data;
 			visibilityState[text] = visible;
 			applyFilters();
@@ -290,7 +306,9 @@ const setupMapLayers = async (
 				],
 			] as any;
 
+			// Apply filter to both main points and highlight layer
 			map.setFilter("biodiversity-points", filter);
+			map.setFilter("biodiversity-points-highlight", filter);
 		};
 
 		applyFilters();
@@ -312,7 +330,7 @@ const setupEmojiSymbols = (map: maplibregl.Map): void => {
 		return canvas;
 	};
 
-	const uniqueEmojis = Object.values(EMOJI_MAP);
+	const uniqueEmojis = [...new Set(Object.values(EMOJI_MAP))];
 
 	uniqueEmojis.forEach((emoji) => {
 		try {
