@@ -312,8 +312,7 @@ const setupEmojiSymbols = (map: maplibregl.Map): void => {
 		return canvas;
 	};
 
-	// Use Object.values to get unique emojis from EMOJI_MAP
-	const uniqueEmojis = [...new Set(Object.values(EMOJI_MAP))];
+	const uniqueEmojis = Object.values(EMOJI_MAP);
 
 	uniqueEmojis.forEach((emoji) => {
 		try {
