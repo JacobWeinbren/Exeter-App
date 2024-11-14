@@ -21,14 +21,17 @@ export const initControls = (map: maplibregl.Map): void => {
 
 	// Add keyboard navigation support
 	const handleKeyboardNavigation = (e: KeyboardEvent): void => {
-		if (e.key === 'Escape') {
+		if (e.key === "Escape") {
 			// Close any open panels
 			$("#leaderboardContainer").addClass("-translate-x-full");
 			$("#legend").addClass("-translate-y-[calc(100%+0.5rem)]");
 		}
 	};
 
-	document.addEventListener('keydown', handleKeyboardNavigation);
+	document.addEventListener("keydown", handleKeyboardNavigation);
+
+	// Add 3D toggle initialization
+	$("#3dToggle").on("click", () => toggle3D(map));
 };
 
 // Simple chart toggle
@@ -74,4 +77,27 @@ const toggleLegend = (): void => {
 	const legend = $("#legend");
 	legend.toggleClass("-translate-y-[calc(100%+0.5rem)]");
 	legend.toggleClass("is-visible");
+};
+
+const toggle3D = (map: maplibregl.Map): void => {
+	const current3DState = map.getPitch();
+	const is3D = current3DState > 0;
+
+	if (is3D) {
+		// Switch to 2D
+		map.easeTo({
+			pitch: 0,
+			bearing: 0,
+			duration: 300,
+		});
+		$("#3dToggle i").text("🗺️");
+	} else {
+		// Switch to 3D
+		map.easeTo({
+			pitch: 90,
+			bearing: 0,
+			duration: 300,
+		});
+		$("#3dToggle i").text("🏔️");
+	}
 };

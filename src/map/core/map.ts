@@ -22,7 +22,6 @@ export const createMap = async (config: MapConfig): Promise<maplibregl.Map> => {
 	const mapData = getMapData();
 	const map = initialiseMap(config.token);
 
-	// Store instances in window object
 	(window as unknown as CustomWindow).map = map;
 	(window as unknown as CustomWindow).token = config.token;
 
