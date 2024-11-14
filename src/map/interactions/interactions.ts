@@ -9,16 +9,22 @@ import {
 } from "./highlight";
 
 let selectedPointId: string | null = null;
-const layerId = "biodiversity-points";
+const INTERACTIVE_LAYERS = [
+	"biodiversity-points",
+	"biodiversity-points-highlight",
+	"biodiversity-points-selected",
+];
 
 export const setupInteractions = (map: maplibregl.Map): void => {
 	initialiseHighlight(map);
 
-	map.on("click", layerId, (e) => {
-		const typedEvent = e as maplibregl.MapMouseEvent & {
-			features?: MapFeature[];
-		};
-		handleFeatureClick(typedEvent, map);
+	INTERACTIVE_LAYERS.forEach((layerId) => {
+		map.on("click", layerId, (e) => {
+			const typedEvent = e as maplibregl.MapMouseEvent & {
+				features?: MapFeature[];
+			};
+			handleFeatureClick(typedEvent, map);
+		});
 	});
 	map.on("click", (e) => handleMapClick(e, map));
 };
@@ -39,7 +45,7 @@ const handleMapClick = (
 	map: maplibregl.Map
 ): void => {
 	const features = map.queryRenderedFeatures(event.point, {
-		layers: [layerId],
+		layers: INTERACTIVE_LAYERS,
 	});
 
 	if (features.length === 0) {
