@@ -48,7 +48,7 @@ const toggleLeaderboard = (): void => {
 	// Toggle leaderboard and adjust related elements
 	leaderboard.toggleClass("-translate-x-full");
 	$(".moveable").toggleClass("translate-x-56");
-	$("#map, #chartContainer, #legend").toggleClass("brightness-75");
+	$("#map, #chartContainer, #legend, #popupBox").toggleClass("brightness-75");
 
 	// Handle chart and legend visibility
 	if (isShowing) {
