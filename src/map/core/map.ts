@@ -48,7 +48,10 @@ const initialiseMap = (token: string): maplibregl.Map => {
 		minZoom: MAP_CONSTANTS.MIN_ZOOM,
 		center: MAP_CONSTANTS.DEFAULT_CENTER,
 		pitch: 0,
-		antialias: true,
+		antialias: false,
+		maxTileCacheSize: 20,
+		preserveDrawingBuffer: false,
+		renderWorldCopies: false,
 	});
 };
 
@@ -89,7 +92,7 @@ const addMapLayers = (map: maplibregl.Map, mapData: MapData) => {
 		paint: {
 			"circle-radius": 15,
 			"circle-color": "#ffffff",
-			"circle-opacity": 0.3,
+			"circle-opacity": 0.7,
 			"circle-stroke-width": 2,
 			"circle-stroke-color": "#ffffff",
 			"circle-stroke-opacity": 1,
@@ -103,7 +106,7 @@ const addMapLayers = (map: maplibregl.Map, mapData: MapData) => {
 		paint: {
 			"circle-radius": 15,
 			"circle-color": "#007cbf",
-			"circle-opacity": 0.3,
+			"circle-opacity": 0.7,
 			"circle-stroke-width": 2,
 			"circle-stroke-color": "#007cbf",
 			"circle-stroke-opacity": 1,
@@ -208,13 +211,13 @@ const setupMapLayers = async (
 			tiles: [
 				"https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png",
 			],
-			tileSize: 256,
-			maxzoom: 15,
+			tileSize: 512,
+			maxzoom: 12,
 			encoding: "terrarium",
 		});
 
 		// Enable terrain
-		map.setTerrain({ source: "terrain", exaggeration: 2 });
+		map.setTerrain({ source: "terrain", exaggeration: 1.5 });
 
 		// Initialise API
 		initialiseApi((window as unknown as CustomWindow).token);
