@@ -56,22 +56,18 @@ export const legendItems = [
 			{
 				text: "Plant",
 				emoji: EMOJI_MAP["Plant"],
-
 			},
 			{
 				text: "Bird",
 				emoji: EMOJI_MAP["Bird"],
-
 			},
 			{
 				text: "Insect",
 				emoji: EMOJI_MAP["Insect"],
-
 			},
 			{
 				text: "Other Animal",
 				emoji: EMOJI_MAP["Other Animal"],
-
 			},
 			{
 				text: "Animal Trace",
@@ -151,9 +147,9 @@ function renderLegend(subcategoryCounts: Record<string, number>) {
 				.join("")}
 		</div>
 		<div class="pt-2 text-xs text-gray-500 border-t">
-			<div>Data from <a class="underline" href="https://www.exeter.ac.uk/" target="_blank">Exeter University</a>.</div>
-			<a class="underline" href="https://www.openstreetmap.org/copyright" target="_blank">© OpenStreetMap contributors</a>
-		</div>
+    <div>Data from <a class="underline" href="https://www.exeter.ac.uk/" target="_blank">Exeter University</a>. Icons by <a class="underline" href="https://icons.getbootstrap.com/" target="_blank">Bootstrap</a>.
+Map terrain by <a class="underline" href="https://www.mapzen.com/" target="_blank">Mapzen</a>.<a class="underline" href="https://www.openstreetmap.org/copyright" target="_blank">© OpenStreetMap contributors</a></div>
+</div>
 	`;
 
 	$("#legend").html(legendHtml);
